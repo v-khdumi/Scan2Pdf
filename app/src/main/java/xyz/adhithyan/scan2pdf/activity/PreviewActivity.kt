@@ -1,5 +1,6 @@
 package xyz.adhithyan.scan2pdf.activity
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -20,6 +21,7 @@ import xyz.adhithyan.scan2pdf.R
 
 import kotlinx.android.synthetic.main.activity_preview.*
 import kotlinx.android.synthetic.main.content_preview.*
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.util.ImageUtil
 import xyz.adhithyan.scan2pdf.util.PdfUtil
 import xyz.adhithyan.scan2pdf.util.ResultHolder
@@ -37,17 +39,15 @@ class PreviewActivity : AppCompatActivity() {
     previewImage.setImageBitmap(BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!))
   }
 
+  override fun attachBaseContext(newBase: Context) {
+    super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase))
+  }
+
   fun saveAsPdf(v: View) {
     Toast.makeText(this, "Save", Toast.LENGTH_LONG).show()
-    //val name =
     val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),System.currentTimeMillis().toString() + ".pdf")
     file.createNewFile()
     PdfUtil(file.absolutePath, arrayOf(ResultHolder.image!!)).createPdf()
-
-    val intent = Intent(Intent.ACTION_VIEW)
-    intent.setDataAndType(Uri.fromFile(file), "application/pdf")
-    intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-    startActivity(intent)
   }
 
 }
