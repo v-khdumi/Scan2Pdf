@@ -30,6 +30,8 @@ import java.io.FileOutputStream
 import java.lang.Exception
 
 class PreviewActivity : AppCompatActivity() {
+  var i = 0
+  val n = ResultHolder.images!!.size
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -50,4 +52,17 @@ class PreviewActivity : AppCompatActivity() {
     PdfUtil(file.absolutePath, ResultHolder.images!!).createPdf()
   }
 
+  fun previousImage(v: View) {
+    i -= 1
+    val currentImage = ResultHolder.images?.get(i % n)
+    val currentImageSize = currentImage?.size!!
+    previewImage.setImageBitmap(BitmapFactory.decodeByteArray(currentImage, 0, currentImageSize))
+  }
+
+  fun nextImage(v: View) {
+    i += 1
+    val currentImage = ResultHolder.images?.get(i % n)
+    val currentImageSize = currentImage?.size!!
+    previewImage.setImageBitmap(BitmapFactory.decodeByteArray(currentImage, 0, currentImageSize))
+  }
 }

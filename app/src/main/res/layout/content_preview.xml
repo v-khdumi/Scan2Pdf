@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
@@ -9,8 +9,34 @@
   tools:showIn="@layout/activity_preview">
 
   <ImageView
+    android:id="@+id/previewImage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/previewImage"/>
+     />
 
-</android.support.constraint.ConstraintLayout>
+  <ImageButton
+    android:id="@+id/imageButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:srcCompat="@drawable/backward"
+    android:background="@color/colorAccent"
+    android:layout_centerVertical="true"
+    android:layout_alignParentLeft="true"
+    android:layout_marginLeft="10dp"
+    android:paddingLeft="10dp"
+    android:onClick="previousImage"
+    />
+
+  <ImageButton
+    android:id="@+id/imageButton2"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:srcCompat="@drawable/forward"
+    android:background="@color/colorAccent"
+    android:layout_centerVertical="true"
+    android:layout_alignParentRight="true"
+    android:layout_marginRight="10dp"
+    android:paddingRight="10dp"
+    android:onClick="nextImage"/>
+
+</RelativeLayout>
