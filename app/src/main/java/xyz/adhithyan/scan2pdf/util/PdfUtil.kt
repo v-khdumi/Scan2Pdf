@@ -9,8 +9,9 @@ import com.itextpdf.text.Rectangle
 import com.itextpdf.text.pdf.PdfWriter
 import java.io.FileOutputStream
 import java.lang.Exception
+import java.util.*
 
-class PdfUtil(internal val filename: String, internal val jpegs: Array<ByteArray>) {
+class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<ByteArray>) {
 
   fun createPdf() {
     val document = Document(PageSize.getRectangle("A4"), 50F, 38F, 50F, 38F)
@@ -19,6 +20,7 @@ class PdfUtil(internal val filename: String, internal val jpegs: Array<ByteArray
 
     try {
       PdfWriter.getInstance(document, FileOutputStream(filename))
+      document.open()
 
       for(jpeg in jpegs) {
         val image = Image.getInstance(jpeg, false)
@@ -27,7 +29,6 @@ class PdfUtil(internal val filename: String, internal val jpegs: Array<ByteArray
         image.borderWidth = 0F
 
         val bitmap= BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!)
-        val imageSize = ImageUtil.getFitSize(bitmap.width.toFloat(), bitmap.height.toFloat(), documentRectangle)
         image.scaleAbsolute(ImageUtil.calculateFitSize(bitmap.width.toFloat(), bitmap.height.toFloat(), documentRectangle))
 
         val width = (documentRectangle.width - image.scaledWidth) / 2
@@ -35,14 +36,16 @@ class PdfUtil(internal val filename: String, internal val jpegs: Array<ByteArray
 
         image.setAbsolutePosition(width, height)
 
-        document.open()
         document.add(image)
-        document.close()
+        document.newPage()
       }
 
     } catch (ex: Exception) {
       ex.printStackTrace()
+    } finally {
+      if(document.isOpen) { document.close() }
     }
+
   }
 
 }

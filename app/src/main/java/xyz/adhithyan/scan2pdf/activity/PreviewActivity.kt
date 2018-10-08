@@ -47,7 +47,7 @@ class PreviewActivity : AppCompatActivity() {
     Toast.makeText(this, "Save", Toast.LENGTH_LONG).show()
     val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),System.currentTimeMillis().toString() + ".pdf")
     file.createNewFile()
-    PdfUtil(file.absolutePath, arrayOf(ResultHolder.image!!)).createPdf()
+    PdfUtil(file.absolutePath, ResultHolder.images!!).createPdf()
   }
 
 }

@@ -1,5 +1,6 @@
 package xyz.adhithyan.scan2pdf.activity
 
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -10,6 +11,7 @@ import xyz.adhithyan.scan2pdf.R
 import xyz.adhithyan.scan2pdf.R.id.camera
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
+import android.graphics.Point
 import com.wonderkiln.camerakit.CameraKitEventListener
 import kotlinx.android.synthetic.main.activity_scan.view.*
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
@@ -23,6 +25,9 @@ class ScanActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_scan)
 
+    resizeButtons()
+    title = "Scanner"
+    ResultHolder.clearImages()
   }
 
   override fun onResume() {
@@ -40,16 +45,36 @@ class ScanActivity : AppCompatActivity() {
   }
 
   fun captureImage(v: View) {
-    //camera.captureImage()
-    val captureStartTime = System.currentTimeMillis()
+    var progress = ProgressDialog(this)
+    progress.isIndeterminate = true
+    progress.setMessage("Processing image..")
+    progress.show()
+
     camera.captureImage {
       val jpegBytes = it.jpeg
-      val callbackTime = System.currentTimeMillis()
-      ResultHolder.image = jpegBytes
-      ResultHolder.timeToCallback = callbackTime - captureStartTime
-      val intent = Intent(this@ScanActivity, PreviewActivity::class.java)
-      startActivity(intent)
+      ResultHolder.images?.add(jpegBytes)
     }
+
+    progress.dismiss()
   }
 
+  fun done(v: View) {
+    startPreviewActivity()
+  }
+
+  private fun resizeButtons() {
+    val display = windowManager.defaultDisplay
+    val size = Point()
+    display.getSize(size)
+    val width = (size.x / 2)
+
+    buttonCapture.width = width
+    buttonDone.width = width
+  }
+
+  private fun startPreviewActivity() {
+    ResultHolder.image = ResultHolder.images?.first
+    val intent = Intent(this@ScanActivity, PreviewActivity::class.java)
+    startActivity(intent)
+  }
 }
