@@ -49,4 +49,14 @@
     android:layout_alignParentBottom="true"
     android:layout_centerInParent="true"/>
 
+  <Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/colorAccent"
+    android:textColor="@android:color/white"
+    android:text="BW"
+    android:onClick="convertToBw"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"/>
+
 </RelativeLayout>

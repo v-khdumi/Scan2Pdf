@@ -28,6 +28,7 @@ import xyz.adhithyan.scan2pdf.R
 import kotlinx.android.synthetic.main.activity_preview.*
 import kotlinx.android.synthetic.main.content_preview.*
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
+import xyz.adhithyan.scan2pdf.extensions.toByteArray
 import xyz.adhithyan.scan2pdf.util.FileUtil
 import xyz.adhithyan.scan2pdf.util.ImageUtil
 import xyz.adhithyan.scan2pdf.util.PdfUtil
@@ -109,6 +110,18 @@ class PreviewActivity : AppCompatActivity() {
         //.withAspectRatio(16F, 9F)
         .withMaxResultSize(ResultHolder.currentImageWidth, ResultHolder.currentImageHeight)
         .start(this)
+  }
+
+
+  fun convertToBw(v: View) {
+    val progress = ProgressDialog(this)
+    progress.setMessage("Converting image to B&W ..")
+    progress.isIndeterminate = true
+    progress.show()
+    val bwImage = ImageUtil.convertToGrayscale(ResultHolder.images?.get(i % n)!!)
+    ResultHolder.images!![i % n] = bwImage.toByteArray()
+    setBitmap(bwImage)
+    progress.dismiss()
   }
 
   private fun setBitmap(image: Bitmap) {

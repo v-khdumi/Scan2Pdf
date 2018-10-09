@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.net.Uri
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 
 class FileUtil {
   companion object {
@@ -32,5 +33,15 @@ class FileUtil {
       return file
     }
 
+    fun copyImage(image: ByteArray, filename: String, filesDir: File): File {
+      val file = File(filesDir, filename)
+      if(file.exists()) { file.delete() }
+      file.createNewFile()
+
+      val fos = FileOutputStream(file)
+      fos.write(image)
+
+      return file
+    }
   }
 }
