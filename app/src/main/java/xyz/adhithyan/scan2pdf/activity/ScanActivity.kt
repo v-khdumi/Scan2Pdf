@@ -12,6 +12,7 @@ import xyz.adhithyan.scan2pdf.R.id.camera
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
 import android.graphics.Point
+import android.widget.Toast
 import com.wonderkiln.camerakit.CameraKitEventListener
 import kotlinx.android.synthetic.main.activity_scan.view.*
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
@@ -20,13 +21,12 @@ import xyz.adhithyan.scan2pdf.util.ResultHolder
 
 
 class ScanActivity : AppCompatActivity() {
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_scan)
 
     resizeButtons()
-    title = "Scanner"
+    //title = "Scanner"
     ResultHolder.clearImages()
   }
 
@@ -59,7 +59,11 @@ class ScanActivity : AppCompatActivity() {
   }
 
   fun done(v: View) {
-    startPreviewActivity()
+    if(ResultHolder.images?.size!! > 0) {
+      startPreviewActivity()
+    } else {
+      Toast.makeText(this, "No picture was captured. Take a picture to convert to pdf.", Toast.LENGTH_LONG).show()
+    }
   }
 
   private fun resizeButtons() {

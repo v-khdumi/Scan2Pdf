@@ -9,7 +9,7 @@ class App: Application() {
     super.onCreate()
 
     val font = CalligraphyConfig.Builder()
-        .setDefaultFontPath("fonts/Lato-Regular.ttf")
+        .setDefaultFontPath("fonts/GoogleSans-Regular.ttf")
         .setFontAttrId(R.attr.fontPath)
         .build()
     CalligraphyConfig.initDefault(font)

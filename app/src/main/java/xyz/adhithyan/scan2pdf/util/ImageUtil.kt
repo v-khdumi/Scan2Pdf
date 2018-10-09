@@ -17,6 +17,7 @@ class ImageUtil {
       return Rectangle(Math.abs(newWidth).toFloat(), Math.abs(newHeight).toFloat())
     }
 
+
   }
 
 

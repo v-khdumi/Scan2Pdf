@@ -14,7 +14,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
 
 class MainActivity : AppCompatActivity() {
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -45,5 +44,4 @@ class MainActivity : AppCompatActivity() {
     val intent = Intent(this, ScanActivity::class.java)
     startActivity(intent)
   }
-
 }

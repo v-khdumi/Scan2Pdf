@@ -24,7 +24,7 @@ class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<Byte
 
       for(jpeg in jpegs) {
         val image = Image.getInstance(jpeg, false)
-        image.compressionLevel = (30 * 0.75).toInt()
+        image.compressionLevel = (30 * 0.9).toInt()
         image.border = Rectangle.BOX
         image.borderWidth = 0F
 
