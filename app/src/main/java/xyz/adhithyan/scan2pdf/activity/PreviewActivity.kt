@@ -23,6 +23,10 @@ import com.itextpdf.text.pdf.PdfWriter
 import com.itextpdf.text.pdf.parser.InlineImageUtils
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.util.FileUtils
+import io.reactivex.Observable
+import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import xyz.adhithyan.scan2pdf.R
 
 import kotlinx.android.synthetic.main.activity_preview.*
@@ -71,11 +75,19 @@ class PreviewActivity : AppCompatActivity() {
     progress.isIndeterminate = true
     progress.setMessage("Creating pdf..")
     progress.show()
+
     val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),System.currentTimeMillis().toString() + ".pdf")
     file.createNewFile()
-    PdfUtil(file.absolutePath, ResultHolder.images!!).createPdf()
+
+    Observable.just<Unit>(Unit)
+        .map { PdfUtil(file.absolutePath, ResultHolder.images!!).createPdf() }
+        .subscribeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe {
+          Toast.makeText(this, "Pdf created successfully.", Toast.LENGTH_LONG).show()
+        }
+
     progress.dismiss()
-    Toast.makeText(this, "Pdf created successfully.", Toast.LENGTH_LONG).show()
   }
 
   fun previousImage(v: View) {
@@ -118,9 +130,16 @@ class PreviewActivity : AppCompatActivity() {
     progress.setMessage("Converting image to B&W ..")
     progress.isIndeterminate = true
     progress.show()
-    val bwImage = ImageUtil.convertToGrayscale(ResultHolder.images?.get(i % n)!!)
-    ResultHolder.images!![i % n] = bwImage.toByteArray()
-    setBitmap(bwImage)
+
+    Observable.just<Unit>(Unit)
+        .map { ImageUtil.convertToGrayscale(ResultHolder.images?.get(i % n)!!) }
+        .subscribeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe {
+          ResultHolder.images!![i % n] = it.toByteArray()
+          setBitmap(it)
+        }
+
     progress.dismiss()
   }
 
