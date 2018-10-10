@@ -26,7 +26,7 @@ class ScanActivity : AppCompatActivity() {
     setContentView(R.layout.activity_scan)
 
     resizeButtons()
-    //title = "Scanner"
+    title = "New Scan"
     ResultHolder.clearImages()
   }
 
