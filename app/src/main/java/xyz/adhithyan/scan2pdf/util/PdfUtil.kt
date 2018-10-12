@@ -12,7 +12,6 @@ import java.lang.Exception
 import java.util.*
 
 class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<ByteArray>) {
-
   fun createPdf() {
     val document = Document(PageSize.getRectangle("A4"), 50F, 38F, 50F, 38F)
     val documentRectangle = document.pageSize
@@ -24,7 +23,7 @@ class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<Byte
 
       for(jpeg in jpegs) {
         val image = Image.getInstance(jpeg, false)
-        image.compressionLevel = (30 * 0.9).toInt()
+        //image.compressionLevel = (30 * 0.9).toInt()
         image.border = Rectangle.BOX
         image.borderWidth = 0F
 
@@ -45,7 +44,5 @@ class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<Byte
     } finally {
       if(document.isOpen) { document.close() }
     }
-
   }
-
 }

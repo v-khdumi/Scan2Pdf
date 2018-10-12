@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+    android:id="@+id/scan_take_photo"
+    android:icon="@drawable/ic_take_photo"
+    android:title="Capture"/>
+
+  <item
+    android:id="@+id/scan_convert"
+    android:icon="@drawable/ic_save"
+    android:title="Convert"/>
+</menu>
