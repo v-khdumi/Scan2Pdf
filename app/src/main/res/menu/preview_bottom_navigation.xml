@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+    android:id="@+id/preview_menu_crop"
+    android:icon="@drawable/ic_crop"
+    android:title="Crop"/>
+
+  <item
+    android:id="@+id/preview_menu_filters"
+    android:icon="@drawable/ic_photo_filter"
+    android:title="Filters">
+  </item>
+
+  <item
+    android:id="@+id/preview_menu_convert"
+    android:icon="@drawable/ic_save"
+    android:title="Convert to Pdf"/>
+</menu>

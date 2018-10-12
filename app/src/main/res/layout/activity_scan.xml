@@ -1,58 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
-  xmlns:camerakit="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   tools:context=".activity.ScanActivity">
 
-  <com.wonderkiln.camerakit.CameraView
-    android:id="@+id/camera"
+  <android.support.design.widget.AppBarLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:adjustViewBounds="true"
-    camerakit:ckJpegQuality="50" />
+    android:theme="@style/AppTheme.AppBarOverlay">
 
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_alignParentBottom="true">
+    <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      android:background="?attr/colorPrimary"
+      app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-    <View android:layout_height="fill_parent"
-      android:layout_width="5px"
-      android:background="#90909090"/>
+  </android.support.design.widget.AppBarLayout>
 
-    <Button
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:onClick="captureImage"
-      android:text="Capture"
-      android:textScaleX="1.1"
-      android:background="@color/colorAccent"
-      android:textColor="@android:color/white"
-      android:layout_weight="1"
-      android:id="@+id/buttonCapture"/>
+  <include layout="@layout/content_scan" />
 
-    <View android:layout_height="fill_parent"
-      android:layout_width="10px"
-      android:background="#90909090"/>
-
-    <Button
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:onClick="done"
-      android:text="Convert"
-      android:textScaleX="1.1"
-      android:background="@color/colorAccent"
-      android:textColor="@android:color/white"
-      android:layout_weight="1"
-      android:id="@+id/buttonDone"/>
-
-    <View android:layout_height="fill_parent"
-      android:layout_width="5px"
-      android:background="#90909090"/>
-  </LinearLayout>
-
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
