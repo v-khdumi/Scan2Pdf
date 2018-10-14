@@ -5,10 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
+import android.view.MenuItem
 import android.widget.Toast
 import com.wonderkiln.camerakit.CameraKit
 import kotlinx.android.synthetic.main.activity_preview.*
 import kotlinx.android.synthetic.main.content_scan.*
+import ru.whalemare.sheetmenu.SheetMenu
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
 import xyz.adhithyan.scan2pdf.extensions.getProgressBar
@@ -24,7 +26,6 @@ class ScanActivity : AppCompatActivity() {
 
 
     supportActionBar?.title = "New Scan"
-    camera.setFlash(CameraKit.Constants.FLASH_ON);
     ResultHolder.clearImages()
     bottomNavigationScan.setOnNavigationItemSelectedListener(bottomNavigationClickListener)
   }
@@ -71,16 +72,30 @@ class ScanActivity : AppCompatActivity() {
   private val bottomNavigationClickListener by lazy {
     BottomNavigationView.OnNavigationItemSelectedListener { item ->
       when (item.itemId) {
-        R.id.scan_take_photo -> {
-          captureImage()
-          return@OnNavigationItemSelectedListener true
-        }
-        R.id.scan_convert -> {
-          done()
-          return@OnNavigationItemSelectedListener true
-        }
+        R.id.scan_take_photo -> { captureImage(); return@OnNavigationItemSelectedListener true }
+        R.id.scan_convert -> { done(); return@OnNavigationItemSelectedListener true }
+        R.id.scan_flash_options -> { showFlashOptionsMenu(); return@OnNavigationItemSelectedListener true }
       }
       false
     }
   }
+
+  private fun showFlashOptionsMenu() {
+    SheetMenu().apply {
+      titleId = R.string.sheet_menu_flash
+      click = MenuItem.OnMenuItemClickListener {
+        when (it.itemId) {
+          R.id.flash_auto -> { autoFlash();true }
+          R.id.flash_on -> { turnFlashOn(); true }
+          R.id.flash_off -> { turnFlashOff(); true }
+          else -> {true}
+        }
+      }
+      menu = R.menu.menu_flash
+    }.show(this)
+  }
+
+  private fun turnFlashOn() { camera.flash = CameraKit.Constants.FLASH_ON }
+  private fun turnFlashOff() { camera.flash = CameraKit.Constants.FLASH_OFF }
+  private fun autoFlash() { camera.flash = CameraKit.Constants.FLASH_AUTO }
 }

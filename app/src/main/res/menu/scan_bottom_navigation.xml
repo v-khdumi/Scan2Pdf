@@ -6,6 +6,11 @@
     android:title="Capture"/>
 
   <item
+    android:id="@+id/scan_flash_options"
+    android:icon="@drawable/ic_flash_on"
+    android:title="Flash"/>
+
+  <item
     android:id="@+id/scan_convert"
     android:icon="@drawable/ic_save"
     android:title="Convert"/>
