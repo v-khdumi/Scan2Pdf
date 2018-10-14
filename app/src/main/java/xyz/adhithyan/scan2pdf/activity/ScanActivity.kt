@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.wonderkiln.camerakit.CameraKit
 import kotlinx.android.synthetic.main.activity_preview.*
 import kotlinx.android.synthetic.main.content_scan.*
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
@@ -23,6 +24,7 @@ class ScanActivity : AppCompatActivity() {
 
 
     supportActionBar?.title = "New Scan"
+    camera.setFlash(CameraKit.Constants.FLASH_ON);
     ResultHolder.clearImages()
     bottomNavigationScan.setOnNavigationItemSelectedListener(bottomNavigationClickListener)
   }

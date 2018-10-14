@@ -28,7 +28,7 @@ class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<Byte
         image.borderWidth = 0F
 
         val bitmap= BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!)
-        image.scaleAbsolute(ImageUtil.calculateFitSize(bitmap.width.toFloat(), bitmap.height.toFloat(), documentRectangle))
+        //image.scaleAbsolute(ImageUtil.calculateFitSize(bitmap.width.toFloat(), bitmap.height.toFloat(), documentRectangle))
 
         val width = (documentRectangle.width - image.scaledWidth) / 2
         val height = (documentRectangle.height - image.scaledHeight) / 2

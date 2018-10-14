@@ -5,4 +5,10 @@
     android:icon="@drawable/ic_bw"
     android:title="Black and White">
   </item>
+
+  <item
+    android:id="@+id/filter_magic"
+    android:icon="@drawable/ic_magic_filter"
+    android:title="Magic">
+  </item>
 </menu>

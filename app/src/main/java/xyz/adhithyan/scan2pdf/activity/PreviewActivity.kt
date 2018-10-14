@@ -18,10 +18,17 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_preview.*
 import kotlinx.android.synthetic.main.content_preview.*
+import org.opencv.android.Utils
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.imgproc.Imgproc
+import org.opencv.photo.Photo
 import ru.whalemare.sheetmenu.SheetMenu
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
+import xyz.adhithyan.scan2pdf.extensions.applyMagicFilter
 import xyz.adhithyan.scan2pdf.extensions.getProgressBar
+import xyz.adhithyan.scan2pdf.extensions.showLongToast
 import xyz.adhithyan.scan2pdf.extensions.toByteArray
 import xyz.adhithyan.scan2pdf.listeners.SwypeListener
 import xyz.adhithyan.scan2pdf.util.FileUtil
@@ -34,6 +41,7 @@ import java.io.FileOutputStream
 class PreviewActivity : AppCompatActivity() {
   var i = 0
   val n = ResultHolder.images!!.size
+  external fun getMagicColorBitmap(bitmap: Bitmap): Bitmap
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -180,11 +188,30 @@ class PreviewActivity : AppCompatActivity() {
       titleId = R.string.sheet_menu_title
       click = MenuItem.OnMenuItemClickListener {
         when (it.itemId) {
-          R.id.filter_bw -> { convertToBw();true}
+          R.id.filter_bw -> { convertToBw();true }
+          R.id.filter_magic -> { magicFilter(); true }
           else -> {true}
         }
       }
       menu = R.menu.photo_filters
     }.show(this)
+  }
+
+  private fun magicFilter() {
+    val progress = this.getProgressBar("Applying magic filter ..")
+    progress.show()
+
+    val currentImage = ResultHolder.images?.get(Math.abs(i % n))
+    val bitmap = BitmapFactory.decodeByteArray(currentImage, 0, currentImage!!.size)
+
+    Observable.just<Unit>(Unit)
+        .map { bitmap.applyMagicFilter() }
+        .subscribeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe {
+          ResultHolder.images!![Math.abs(i % n)] = it.toByteArray()
+          setBitmap(it)
+          progress.dismiss()
+        }
   }
 }
