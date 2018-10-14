@@ -3,8 +3,7 @@ package xyz.adhithyan.scan2pdf.activity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -21,6 +20,7 @@ import kotlinx.android.synthetic.main.content_preview.*
 import org.opencv.android.Utils
 import org.opencv.core.CvType
 import org.opencv.core.Mat
+import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import org.opencv.photo.Photo
 import ru.whalemare.sheetmenu.SheetMenu
@@ -31,10 +31,8 @@ import xyz.adhithyan.scan2pdf.extensions.getProgressBar
 import xyz.adhithyan.scan2pdf.extensions.showLongToast
 import xyz.adhithyan.scan2pdf.extensions.toByteArray
 import xyz.adhithyan.scan2pdf.listeners.SwypeListener
-import xyz.adhithyan.scan2pdf.util.FileUtil
-import xyz.adhithyan.scan2pdf.util.ImageUtil
-import xyz.adhithyan.scan2pdf.util.PdfUtil
-import xyz.adhithyan.scan2pdf.util.ResultHolder
+import xyz.adhithyan.scan2pdf.util.*
+import xyz.adhithyan.scan2pdf.views.DocumentCanvas
 import java.io.File
 import java.io.FileOutputStream
 
@@ -141,7 +139,12 @@ class PreviewActivity : AppCompatActivity() {
   private fun setBitmap(image: Bitmap) {
     ResultHolder.currentImageWidth = image.width
     ResultHolder.currentImageHeight = image.height
+
     previewImage.setImageBitmap(image)
+
+    val mat = Mat(Size(image.width.toDouble(), image.height.toDouble()), CvType.CV_8U)
+    Utils.bitmapToMat(image, mat)
+    detectDocument(mat, image)
   }
 
   private fun setCroppedImage(data: Intent?) {
@@ -213,5 +216,14 @@ class PreviewActivity : AppCompatActivity() {
           setBitmap(it)
           progress.dismiss()
         }
+  }
+
+  private fun detectDocument(mat: Mat, image: Bitmap) {
+    DocumentDetection(mat).detectDocument()
+    val v = DocumentCanvas(this)
+    val copy = image.copy(image.config, true)
+    val canvas = Canvas(copy)
+    v.draw(canvas)
+    previewImage.setImageBitmap(copy)
   }
 }
