@@ -11,6 +11,9 @@ import android.view.View
 import xyz.adhithyan.scan2pdf.extensions.showLongToast
 import xyz.adhithyan.scan2pdf.util.ResultHolder
 import java.lang.Exception
+import android.R.attr.path
+
+
 
 class DocumentCanvas(context: Context): View(context) {
   override fun onDraw(canvas: Canvas) {
@@ -38,9 +41,9 @@ class DocumentCanvas(context: Context): View(context) {
         p.color = Color.BLUE
         p.strokeWidth = 5F
 
-
+        val newBox = PathShape(path, width, height)
+        newBox.draw(canvas, p)
         canvas.drawPath(path, p)
-        
       }
     } catch(ex: Exception) { context.showLongToast("excep")}
   }
