@@ -8,7 +8,7 @@
   tools:context=".activity.PreviewActivity"
   tools:showIn="@layout/activity_preview">
 
-  <ImageView
+  <xyz.adhithyan.scan2pdf.views.CropImageView
     android:id="@+id/previewImage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
