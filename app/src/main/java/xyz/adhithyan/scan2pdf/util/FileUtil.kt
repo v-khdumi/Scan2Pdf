@@ -1,6 +1,7 @@
 package xyz.adhithyan.scan2pdf.util
 
 import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -44,4 +45,17 @@ class FileUtil {
       return file
     }
   }
+}
+
+fun Uri.toByteArray(context: Context): ByteArray {
+  val istream = context.contentResolver.openInputStream(this)
+  val byteBuffer = ByteArrayOutputStream()
+  val bufferSize = 1024
+  val buffer = ByteArray(bufferSize)
+  while(true) {
+    val len = istream.read(buffer)
+    if(len == -1) break
+    byteBuffer.write(buffer, 0, len)
+  }
+  return byteBuffer.toByteArray()
 }

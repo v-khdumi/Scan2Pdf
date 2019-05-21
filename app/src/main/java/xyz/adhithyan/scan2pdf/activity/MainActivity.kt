@@ -1,21 +1,33 @@
 package xyz.adhithyan.scan2pdf.activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.zhihu.matisse.Matisse
+import com.zhihu.matisse.MimeType
+import com.zhihu.matisse.engine.impl.GlideEngine
+import com.zhihu.matisse.engine.impl.PicassoEngine
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
+import xyz.adhithyan.scan2pdf.util.ResultHolder
+import xyz.adhithyan.scan2pdf.util.toByteArray
 
 class MainActivity : AppCompatActivity() {
+  val CHOOSE_IMAGES = 3592
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -44,11 +56,33 @@ class MainActivity : AppCompatActivity() {
     super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase))
   }
 
-  fun startScan(v: View) {
-    val intent = Intent(this, ScanActivity::class.java)
-    startActivity(intent)
+  fun startScan() {
+    /*val intent = Intent(this, ScanActivity::class.java)
+    startActivity(intent)*/
+    Matisse.from(this)
+            .choose(MimeType.ofImage(), false)
+            .countable(true)
+            .maxSelectable(5)
+            .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+            .thumbnailScale(0.85f)
+            .imageEngine(PicassoEngine())
+            .forResult(CHOOSE_IMAGES)
   }
 
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if(requestCode == CHOOSE_IMAGES && resultCode == Activity.RESULT_OK) {
+      val selected = Matisse.obtainResult(data)
+      for(selectedImage in selected) {
+        val imageBytes = (selectedImage as Uri).toByteArray(this)
+        ResultHolder.images?.add(imageBytes)
+      }
+      ResultHolder.image = ResultHolder.images?.first
+      val intent = Intent(this, PreviewActivity::class.java)
+      startActivity(intent)
+      Log.d("Chosen images", "selected:" + selected)
+    }
+  }
   private val bottomNavigationClickListener by lazy {
     BottomNavigationView.OnNavigationItemSelectedListener { item ->
       when (item.itemId) {
@@ -57,7 +91,8 @@ class MainActivity : AppCompatActivity() {
           return@OnNavigationItemSelectedListener true
         }
         R.id.navigation_new_scan -> {
-          startActivity(Intent(this@MainActivity, ScanActivity::class.java))
+          //startActivity(Intent(this@MainActivity, ScanActivity::class.java))
+          startScan()
           return@OnNavigationItemSelectedListener true
         }
         R.id.navigation_settings -> {
