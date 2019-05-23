@@ -11,9 +11,9 @@ class DocumentDetection(internal val input: Mat) {
   fun detectDocument(): Boolean {
     val contours = findContours()
 
-    val quad = getQuadrilateral(contours, input.size())
+    val quad = getQuadrilateral2(contours, input.size())
     if(quad != null) {
-      val c = quad.contour
+      /*val c = quad.contour
       var previewPoints = Array<Point>(4, {Point()})
 
       var rescaledPoints = Array<Point>(4, {Point()})
@@ -23,8 +23,8 @@ class DocumentDetection(internal val input: Mat) {
         val y = java.lang.Double.valueOf(quad.points[i].y * ratio)
         rescaledPoints[i] = Point(x, y)
       }
-      previewPoints = rescaledPoints
-      ResultHolder.scannedDoc = Document(input, null, quad, previewPoints, input.size())
+      previewPoints = rescaledPoints*/
+      ResultHolder.scannedDoc = Document(input, null, null, quad.points, input.size())
       return true
     } else {
       val doc = Mat(input.size(), CvType.CV_8UC4)
@@ -94,6 +94,36 @@ class DocumentDetection(internal val input: Mat) {
     return quadrilateral
   }
 
+    fun contourOffset(cnt: Array<Point>, offset: Point): Array<Point> {
+        cnt.plus(offset)
+        return cnt
+    }
+
+    private fun getQuadrilateral2(contours: ArrayList<MatOfPoint>, srcSize: Size): detected? {
+        val height = srcSize.height
+        val width = srcSize.width
+
+
+        var maxContourArea = (width - 10) * (height - 10)
+        var maxArea = maxContourArea * 0.5
+        var quadrilateral: detected? = null
+        var pageContour = arrayOf(Point(5.0, 5.0), Point(5.0, height-5), Point(width-5, height-5), Point(width-5, 5.0))
+        for(cnt in contours) {
+            val cont = MatOfPoint2f(*cnt.toArray())
+            val perimeter = Imgproc.arcLength(cont, true)
+            val approx = MatOfPoint2f()
+            Imgproc.approxPolyDP(cont, approx, 0.03* perimeter, true)
+            val approxContourArea = Imgproc.contourArea(approx)
+            if(approx.toArray().size == 4 && Imgproc.isContourConvex(MatOfPoint(*approx.toArray())) && (maxArea < approxContourArea) && (approxContourArea< maxContourArea)) {
+                maxArea = Imgproc.contourArea(approx)
+                pageContour = approx.toArray()
+            }
+        }
+        pageContour = sortPoints(pageContour)
+        pageContour = contourOffset(pageContour, Point(-5.0, -5.0))
+        quadrilateral = detected(points = pageContour)
+        return quadrilateral
+    }
   private fun sortPoints(src: Array<Point>): Array<Point> {
     // .inbuilt method didnt work, so manual addition
     val srcPoints = ArrayList<Point>()
@@ -120,7 +150,30 @@ class DocumentDetection(internal val input: Mat) {
 
     return result
   }
+
+  fun detectDoc2() {
+    val img = Mat()
+    Imgproc.cvtColor(input, img, Imgproc.COLOR_BGR2RGB)
+    var height = 800
+      val ratio =  height / img.size().height
+      var width = img.size().width
+      //val size = Size(ratio * width, height.toDouble())
+    //Imgproc.resize(img, img, size)
+    Imgproc.bilateralFilter(img, img, 9, 75.0, 75.0)
+      Imgproc.adaptiveThreshold(img, img, 255.0, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 115, 4.0)
+      Imgproc.medianBlur(img, img, 11)
+      Imgproc.Canny(img, img, 200.0, 500.0)
+      val contours = ArrayList<MatOfPoint>()
+      val hierarchy = Mat()
+      Imgproc.findContours(img, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE)
+      height = img.size().height.toInt()
+      width = img.size().width
+      var MAX_CONTOUR_AREA = (width - 10) * (height - 10)
+      var maxAreaFound = MAX_CONTOUR_AREA * 0.5
+  }
 }
 
+
+data class detected(val points: Array<Point>)
 data class Quadrilateral(val contour: MatOfPoint, val points: Array<Point>)
-data class Document(val original: Mat, val processed: Mat?, val quad: Quadrilateral, val previewPoints: Array<Point>, val size: Size)
+data class Document(val original: Mat, val processed: Mat?, val quad: Quadrilateral?, val previewPoints: Array<Point>, val size: Size)

@@ -21,8 +21,8 @@ class DocumentCanvas(context: Context): View(context) {
 
     try {
       val doc = ResultHolder?.scannedDoc
-      val quad = doc?.quad
-      val points = quad?.points!!
+      val quad = doc?.quad!!
+      val points = doc.previewPoints!!
       val size = doc?.size
 
       if(doc != null) {
