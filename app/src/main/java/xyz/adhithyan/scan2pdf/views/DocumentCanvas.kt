@@ -24,6 +24,7 @@ class DocumentCanvas(context: Context): View(context) {
       val quad = doc?.quad!!
       val points = doc.previewPoints!!
       val size = doc?.size
+      val ratio = quad?.ratio
 
       if(doc != null) {
         //Log.v("HELLO", )
@@ -38,11 +39,11 @@ class DocumentCanvas(context: Context): View(context) {
         path.close()
 
         val p = Paint()
-        p.color = Color.BLUE
-        p.strokeWidth = 5F
+        //p.color = Color.BLUE
+        //p.strokeWidth = 5F
 
-        val newBox = PathShape(path, width, height)
-        newBox.draw(canvas, p)
+        //val newBox = PathShape(path, width, height)
+        //newBox.draw(canvas, p)
         canvas.drawPath(path, p)
       }
     } catch(ex: Exception) { context.showLongToast("excep")}
