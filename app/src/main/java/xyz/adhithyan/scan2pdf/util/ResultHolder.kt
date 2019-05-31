@@ -16,6 +16,6 @@ class ResultHolder {
       images = LinkedList()
     }
 
-    var scannedDoc: Document? = null
+    //var scannedDoc: Document? = null
   }
 }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -21,20 +22,17 @@ import org.opencv.android.Utils
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.Size
-import org.opencv.imgproc.Imgproc
-import org.opencv.photo.Photo
 import ru.whalemare.sheetmenu.SheetMenu
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
 import xyz.adhithyan.scan2pdf.extensions.applyMagicFilter
 import xyz.adhithyan.scan2pdf.extensions.getProgressBar
-import xyz.adhithyan.scan2pdf.extensions.showLongToast
 import xyz.adhithyan.scan2pdf.extensions.toByteArray
 import xyz.adhithyan.scan2pdf.listeners.SwypeListener
 import xyz.adhithyan.scan2pdf.util.*
-import xyz.adhithyan.scan2pdf.views.DocumentCanvas
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 
 class PreviewActivity : AppCompatActivity() {
   var i = 0
@@ -144,7 +142,8 @@ class PreviewActivity : AppCompatActivity() {
 
     val mat = Mat(Size(image.width.toDouble(), image.height.toDouble()), CvType.CV_8U)
     Utils.bitmapToMat(image, mat)
-    detectDocument(mat, image)
+    //detectDocument(mat, image)
+    detectDocument()
   }
 
   private fun setCroppedImage(data: Intent?) {
@@ -218,12 +217,44 @@ class PreviewActivity : AppCompatActivity() {
         }
   }
 
-  private fun detectDocument(mat: Mat, image: Bitmap) {
-    DocumentDetection(mat).detectDocument()
-    val v = DocumentCanvas(this)
-    val copy = image.copy(image.config, true)
-    val canvas = Canvas(copy)
-    v.draw(canvas)
-    previewImage.setImageBitmap(copy)
+  private fun detectDocument() {
+    val tmpBitmap = ((previewImage.drawable) as BitmapDrawable).bitmap
+    /*val scaledBitmap = scaledBitmap(tmpBitmap, previewImage.width, previewImage.height)
+    previewImage.setImageBitmap(scaledBitmap)*/
+
+    val edgepoints = edgePoints(tmpBitmap)
+    previewImage.setPoints(edgepoints)
   }
+
+  fun edgePoints(bitmap: Bitmap): Map<Int, PointF> {
+    val pointsF = DocumentUtil().getContourEdgePoints(bitmap)
+    val orderedPoints = orderedValidEdgePoints(bitmap, pointsF)
+    return orderedPoints
+  }
+
+
+
+  private fun getOutlinePoints(tempBitmap: Bitmap): Map<Int, PointF> {
+    val outlinePoints = HashMap<Int, PointF>()
+    outlinePoints.put(0, PointF(0f, 0f))
+    outlinePoints.put(1, PointF(tempBitmap.width.toFloat(), 0f))
+    outlinePoints.put(2, PointF(0f, tempBitmap.height.toFloat()))
+    outlinePoints.put(3, PointF(tempBitmap.width.toFloat(), tempBitmap.height.toFloat()))
+    return outlinePoints
+  }
+
+  private fun orderedValidEdgePoints(tempBitmap:Bitmap, pointFs: List<PointF> ): Map<Int, PointF>  {
+        var orderedPoints = getOrderedPoints(pointFs);
+        if(isValidShape(orderedPoints)) {
+            orderedPoints = getOutlinePoints(tempBitmap);
+        }
+        return orderedPoints;
+    }
+
+   private fun scaledBitmap(bitmap: Bitmap, width: Int, height: Int):Bitmap {
+     val m = Matrix()
+     m.setRectToRect(RectF(0F, 0F, bitmap.width.toFloat(), bitmap.height.toFloat()), RectF(0F, 0F, width.toFloat(), height.toFloat()), Matrix.ScaleToFit.CENTER)
+     return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true);
+   }
+
 }
