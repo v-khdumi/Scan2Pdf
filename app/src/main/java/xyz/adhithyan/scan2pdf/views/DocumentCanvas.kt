@@ -14,7 +14,6 @@ import java.lang.Exception
 import android.R.attr.path
 
 
-
 /*class DocumentCanvas(context: Context): View(context) {
   override fun onDraw(canvas: Canvas) {
     super.onDraw(canvas)

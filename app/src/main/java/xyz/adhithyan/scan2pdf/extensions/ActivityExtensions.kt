@@ -8,15 +8,15 @@ import ru.whalemare.sheetmenu.SheetMenu
 import xyz.adhithyan.scan2pdf.R
 
 fun Context.getProgressBar(message: String): ProgressDialog {
-  val progress = ProgressDialog(this)
-  progress.setProgressStyle(ProgressDialog.STYLE_SPINNER)
-  progress.isIndeterminate = true
-  progress.setMessage(message)
-  progress.setCancelable(false)
-  return progress
+    val progress = ProgressDialog(this)
+    progress.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+    progress.isIndeterminate = true
+    progress.setMessage(message)
+    progress.setCancelable(false)
+    return progress
 }
 
 
 fun Context.showLongToast(info: String) {
-  Toast.makeText(this, info, Toast.LENGTH_LONG).show()
+    Toast.makeText(this, info, Toast.LENGTH_LONG).show()
 }

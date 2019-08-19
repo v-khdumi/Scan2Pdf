@@ -171,7 +171,7 @@ public class DocumentUtil {
         return true;
     }
 
-     public List<PointF> getContourEdgePoints(Bitmap tempBitmap) {
+    public List<PointF> getContourEdgePoints(Bitmap tempBitmap) {
 
         MatOfPoint2f point2f = new DocumentUtil().getPoint(tempBitmap);
         List<Point> points = Arrays.asList(point2f.toArray());
