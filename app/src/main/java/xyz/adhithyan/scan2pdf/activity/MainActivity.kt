@@ -1,18 +1,22 @@
 package xyz.adhithyan.scan2pdf.activity
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.GlideEngine
@@ -22,6 +26,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
+import xyz.adhithyan.scan2pdf.extensions.PERMISSION_REQUEST_CALLBACK
+import xyz.adhithyan.scan2pdf.extensions.checkOrGetPermissions
+import xyz.adhithyan.scan2pdf.extensions.requestPermissionsResult
 import xyz.adhithyan.scan2pdf.util.ResultHolder
 import xyz.adhithyan.scan2pdf.util.toByteArray
 
@@ -34,6 +41,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         bottomNavigation.setOnNavigationItemSelectedListener(bottomNavigationClickListener)
         title = "My Scans"
+
+        checkOrGetPermissions()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -103,5 +112,10 @@ class MainActivity : AppCompatActivity() {
             }
             false
         }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        this.requestPermissionsResult(requestCode, permissions, grantResults)
     }
 }
