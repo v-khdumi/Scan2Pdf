@@ -5,16 +5,22 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 
 
-internal class CropImageView : ImageView {
+internal class CropImageView : FrameLayout {
     private lateinit var image1: ImageView
     private lateinit var image2: ImageView
     private lateinit var image3: ImageView
     private lateinit var image4: ImageView
     private lateinit var paint: Paint
+    private lateinit  var midPointer13: ImageView
+    private lateinit var midPointer12: ImageView
+    private lateinit var midPointer34: ImageView
+    private lateinit var midPointer24: ImageView
 
     constructor(context: Context) : super(context) {
         init()
@@ -38,7 +44,19 @@ internal class CropImageView : ImageView {
         image3 = getImageView(0, height)
         image4 = getImageView(width, height)
 
+        midPointer13 = getImageView(0, height / 2)
+        midPointer12 = getImageView(0, width / 2)
+        midPointer34 = getImageView(0, height / 2)
+        midPointer24 = getImageView(0, height / 2)
 
+        addView(image1)
+        addView(image2)
+        addView(midPointer13)
+        addView(midPointer12)
+        addView(midPointer34)
+        addView(midPointer24)
+        addView(image3)
+        addView(image4)
         initPaint()
     }
 
@@ -88,5 +106,9 @@ internal class CropImageView : ImageView {
         canvas.drawLine(image1.x + (image1.width / 2), image1.y + (image1.height / 2), image2.x + (image2.width / 2), image2.y + (image2.height / 2), paint)
         canvas.drawLine(image2.x + (image2.width / 2), image2.y + (image2.height / 2), image4.x + (image4.width / 2), image4.y + (image4.height / 2), paint)
         canvas.drawLine(image3.x + (image3.width / 2), image3.y + (image3.height / 2), image4.x + (image4.width / 2), image4.y + (image4.height / 2), paint)
+    }
+
+    override fun attachViewToParent(child: View?, index: Int, params: ViewGroup.LayoutParams?) {
+        super.attachViewToParent(child, index, params)
     }
 }

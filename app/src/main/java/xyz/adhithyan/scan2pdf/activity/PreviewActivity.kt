@@ -10,7 +10,10 @@ import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
+import android.view.Gravity
 import android.view.MenuItem
+import android.view.View
+import android.widget.FrameLayout
 import android.widget.Toast
 import com.yalantis.ucrop.UCrop
 import io.reactivex.Observable
@@ -144,8 +147,8 @@ class PreviewActivity : AppCompatActivity() {
 
         val mat = Mat(Size(image.width.toDouble(), image.height.toDouble()), CvType.CV_8U)
         Utils.bitmapToMat(image, mat)
-        //detectDocument(mat, image)
-        detectDocument()
+
+        holderImageCrop.post {  detectDocument() }
     }
 
     private fun setCroppedImage(data: Intent?) {
@@ -231,11 +234,18 @@ class PreviewActivity : AppCompatActivity() {
 
     private fun detectDocument() {
         val tmpBitmap = ((previewImage.drawable) as BitmapDrawable).bitmap
-        /*val scaledBitmap = scaledBitmap(tmpBitmap, previewImage.width, previewImage.height)
-        previewImage.setImageBitmap(scaledBitmap)*/
+        val scaledBitmap = scaledBitmap(tmpBitmap, holderImageCrop.width, holderImageCrop.height)
+        previewImage.setImageBitmap(scaledBitmap)
 
         val edgepoints = edgePoints(tmpBitmap)
-        previewImage.setPoints(edgepoints)
+        polygonView.setPoints(edgepoints)
+        polygonView.visibility = View.VISIBLE
+
+        val padding = resources.getDimension(R.dimen.fab_margin).toInt()
+        val layoutParams = FrameLayout.LayoutParams(tmpBitmap.getWidth() + 2 * padding, tmpBitmap.getHeight() + 2 * padding)
+        layoutParams.gravity = Gravity.CENTER
+
+        polygonView.layoutParams = layoutParams
     }
 
     fun edgePoints(bitmap: Bitmap): Map<Int, PointF> {
@@ -265,7 +275,7 @@ class PreviewActivity : AppCompatActivity() {
     private fun scaledBitmap(bitmap: Bitmap, width: Int, height: Int): Bitmap {
         val m = Matrix()
         m.setRectToRect(RectF(0F, 0F, bitmap.width.toFloat(), bitmap.height.toFloat()), RectF(0F, 0F, width.toFloat(), height.toFloat()), Matrix.ScaleToFit.CENTER)
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
     }
 
 }
