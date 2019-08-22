@@ -33,6 +33,7 @@ import xyz.adhithyan.scan2pdf.extensions.getProgressBar
 import xyz.adhithyan.scan2pdf.extensions.toByteArray
 import xyz.adhithyan.scan2pdf.listeners.SwypeListener
 import xyz.adhithyan.scan2pdf.util.*
+import xyz.adhithyan.scan2pdf.views.CropImageView
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -41,6 +42,7 @@ class PreviewActivity : AppCompatActivity() {
     var i = 0
     val n = ResultHolder.images!!.size
     external fun getMagicColorBitmap(bitmap: Bitmap): Bitmap
+    private lateinit var currentBitmap: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +50,7 @@ class PreviewActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         title = "Preview - Scan2Pdf"
-        setBitmap(BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!))
+        setBitmap(BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!), true)
         bottomNavigationPreview.setOnNavigationItemSelectedListener(bottomNavigationClickListener)
         setImageviewSwypeListener()
     }
@@ -117,6 +119,23 @@ class PreviewActivity : AppCompatActivity() {
                 .start(this)
     }
 
+    fun performCrop() {
+        val points = polygonView.getPoints()
+        val currentBitmap = (previewImage.drawable as BitmapDrawable).bitmap
+        val xRatio = ResultHolder.currentImageWidth.toFloat() / previewImage.width.toFloat()
+        val yRatio = ResultHolder.currentImageHeight.toFloat() / previewImage.height.toFloat()
+
+        val x1 = points.get(0)?.x!! * xRatio
+        val x2 = points.get(1)?.x!! * xRatio
+        val x3 = points.get(2)?.x!! * xRatio
+        val x4 = points.get(3)?.x!! * xRatio
+        val y1 = points.get(0)?.y!! * yRatio
+        val y2 = points.get(1)?.y!! * yRatio
+        val y3 = points.get(2)?.y!! * yRatio
+        val y4 = points.get(3)?.y!! * yRatio
+
+        setBitmap(DocumentUtil().getScannedBitmap(currentBitmap, x1, y1, x2, y2, x3, y3, x4, y4), false)
+    }
 
     fun convertToBw() {
         val progress = getProgressBar("Converting to black & white..")
@@ -128,7 +147,7 @@ class PreviewActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     ResultHolder.images!![Math.abs(i % n)] = it.toByteArray()
-                    setBitmap(it)
+                    setBitmap(it, true)
                     progress.dismiss()
                 }
     }
@@ -136,10 +155,10 @@ class PreviewActivity : AppCompatActivity() {
     private fun setCurrentImage() {
         val currentImage = ResultHolder.images?.get(Math.abs(i % n))
         val currentImageSize = currentImage?.size!!
-        setBitmap(BitmapFactory.decodeByteArray(currentImage, 0, currentImageSize))
+        setBitmap(BitmapFactory.decodeByteArray(currentImage, 0, currentImageSize), true)
     }
 
-    private fun setBitmap(image: Bitmap) {
+    private fun setBitmap(image: Bitmap, detectDoc: Boolean) {
         ResultHolder.currentImageWidth = image.width
         ResultHolder.currentImageHeight = image.height
 
@@ -148,7 +167,11 @@ class PreviewActivity : AppCompatActivity() {
         val mat = Mat(Size(image.width.toDouble(), image.height.toDouble()), CvType.CV_8U)
         Utils.bitmapToMat(image, mat)
 
-        holderImageCrop.post {  detectDocument() }
+        holderImageCrop.post {
+            if(detectDoc) {
+                detectDocument()
+            }
+        }
     }
 
     private fun setCroppedImage(data: Intent?) {
@@ -178,7 +201,7 @@ class PreviewActivity : AppCompatActivity() {
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.preview_menu_crop -> {
-                    cropImage()
+                    performCrop()
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.preview_menu_filters -> {
@@ -227,16 +250,17 @@ class PreviewActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     ResultHolder.images!![Math.abs(i % n)] = it.toByteArray()
-                    setBitmap(it)
+                    setBitmap(it, true)
                     progress.dismiss()
                 }
     }
 
     private fun detectDocument() {
-        val tmpBitmap = ((previewImage.drawable) as BitmapDrawable).bitmap
+        var tmpBitmap = ((previewImage.drawable) as BitmapDrawable).bitmap
         val scaledBitmap = scaledBitmap(tmpBitmap, holderImageCrop.width, holderImageCrop.height)
         previewImage.setImageBitmap(scaledBitmap)
 
+        tmpBitmap = (previewImage.drawable as BitmapDrawable).bitmap
         val edgepoints = edgePoints(tmpBitmap)
         polygonView.setPoints(edgepoints)
         polygonView.visibility = View.VISIBLE

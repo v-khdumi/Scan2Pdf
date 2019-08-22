@@ -1,3 +1,6 @@
 <resources>
   <dimen name="fab_margin">16dp</dimen>
+
+  <dimen name="polygonViewCircleWidth">32dp</dimen>
+  <dimen name="polygonViewStrokeWidth">2dp</dimen>
 </resources>
