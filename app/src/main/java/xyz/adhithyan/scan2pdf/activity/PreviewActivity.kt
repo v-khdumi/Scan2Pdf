@@ -85,20 +85,24 @@ class PreviewActivity : AppCompatActivity() {
                 .subscribe {
                     Toast.makeText(this, "Pdf created successfully.", Toast.LENGTH_LONG).show()
                     progress.dismiss()
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setDataAndType(Uri.fromFile(file), "application/pdf")
-                    intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-                    startActivity(intent)
                 }
     }
 
     fun previousImage() {
-        i -= 1
+        if(i > 0){
+            i-=1
+        } else {
+            i=n-1
+        }
         setCurrentImage()
     }
 
     fun nextImage() {
-        i += 1
+        if(i<n) {
+            i += 1
+        } else {
+            i=0
+        }
         setCurrentImage()
     }
 
@@ -139,7 +143,7 @@ class PreviewActivity : AppCompatActivity() {
 
         val croppedBitmap = DocumentUtil().getScannedBitmap(currentBitmap, x1, y1, x2, y2, x3, y3, x4, y4)
         setBitmap(croppedBitmap, false)
-        ResultHolder.images!![i % n] =  croppedBitmap.toByteArray()
+        ResultHolder.images!![i] =  croppedBitmap.toByteArray()
     }
 
     fun convertToBw() {
@@ -187,7 +191,7 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     private fun setImageviewSwypeListener() {
-        previewImage.setOnTouchListener(object : SwypeListener(this@PreviewActivity) {
+        frameLayout.setOnTouchListener(object : SwypeListener(this@PreviewActivity) {
             override fun onSwipeTop() {}
 
             override fun onSwipeRight() {
@@ -267,7 +271,7 @@ class PreviewActivity : AppCompatActivity() {
         ResultHolder.currentImageHeight = scaledBitmap.height
         ResultHolder.currentImageWidth = scaledBitmap.width
 
-        tmpBitmap = (previewImage.drawable as BitmapDrawable).bitmap
+        tmpBitmap = scaledBitmap
         val edgepoints = edgePoints(tmpBitmap)
         polygonView.setPoints(edgepoints)
         polygonView.visibility = View.VISIBLE
