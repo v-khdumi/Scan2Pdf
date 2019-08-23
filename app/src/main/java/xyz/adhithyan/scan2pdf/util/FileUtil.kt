@@ -3,6 +3,7 @@ package xyz.adhithyan.scan2pdf.util
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -58,4 +59,17 @@ fun Uri.toByteArray(context: Context): ByteArray {
     byteBuffer.write(buffer, 0, len)
   }
   return byteBuffer.toByteArray()
+}
+
+fun createNewPdfFile(): File {
+  val rootPath = Environment.getExternalStorageDirectory().absolutePath + "/Scan2Pdf/"
+  val root = File(rootPath)
+  if(!root.exists()) {
+    root.mkdirs()
+  }
+
+  val file = File(rootPath, "${System.currentTimeMillis()}.pdf")
+  file.createNewFile()
+
+  return file
 }
