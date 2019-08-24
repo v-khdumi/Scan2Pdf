@@ -1,32 +1,25 @@
 package xyz.adhithyan.scan2pdf.activity
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
-import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.Toast
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
-import com.zhihu.matisse.engine.impl.GlideEngine
 import com.zhihu.matisse.engine.impl.PicassoEngine
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import ru.whalemare.sheetmenu.SheetMenu
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
-import xyz.adhithyan.scan2pdf.extensions.PERMISSION_REQUEST_CALLBACK
 import xyz.adhithyan.scan2pdf.extensions.checkOrGetPermissions
 import xyz.adhithyan.scan2pdf.extensions.requestPermissionsResult
 import xyz.adhithyan.scan2pdf.util.ResultHolder
@@ -65,9 +58,7 @@ class MainActivity : AppCompatActivity() {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase))
     }
 
-    fun startScan() {
-        /*val intent = Intent(this, ScanActivity::class.java)
-        startActivity(intent)*/
+    fun chooseFromGallery() {
         Matisse.from(this)
                 .choose(MimeType.ofImage(), false)
                 .countable(true)
@@ -101,12 +92,10 @@ class MainActivity : AppCompatActivity() {
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.navigation_new_scan -> {
-                    //startActivity(Intent(this@MainActivity, ScanActivity::class.java))
-                    startScan()
+                    showScanMenu()
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.navigation_settings -> {
-
                     return@OnNavigationItemSelectedListener true
                 }
             }
@@ -117,5 +106,25 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         this.requestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    private fun showScanMenu() {
+        SheetMenu().apply {
+            titleId = R.string.sheet_menu_title_new_scan
+            click = MenuItem.OnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.new_scan_cam -> {
+                        startActivity(Intent(this@MainActivity, ScanActivity::class.java));true
+                    }
+                    R.id.new_scan_gallery -> {
+                        chooseFromGallery(); true
+                    }
+                    else -> {
+                        true
+                    }
+                }
+            }
+            menu = R.menu.new_scan
+        }.show(this)
     }
 }
