@@ -1,6 +1,5 @@
 package xyz.adhithyan.scan2pdf.util;
 
-
 import org.opencv.core.CvType;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -45,4 +44,3 @@ public class MathUtils {
     }
 
 }
-

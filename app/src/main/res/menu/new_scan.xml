@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/new_scan_cam"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:title="Use camera">
+    </item>
+
+    <item
+        android:id="@+id/new_scan_gallery"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:title="Choose from gallery">
+    </item>
+</menu>

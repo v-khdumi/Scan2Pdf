@@ -14,16 +14,16 @@ import java.lang.Exception
 import android.R.attr.path
 
 
-
-class DocumentCanvas(context: Context): View(context) {
+/*class DocumentCanvas(context: Context): View(context) {
   override fun onDraw(canvas: Canvas) {
     super.onDraw(canvas)
 
     try {
       val doc = ResultHolder?.scannedDoc
-      val quad = doc?.quad
-      val points = quad?.points!!
+      val quad = doc?.quad!!
+      val points = doc.previewPoints!!
       val size = doc?.size
+      val ratio = quad?.ratio
 
       if(doc != null) {
         //Log.v("HELLO", )
@@ -38,13 +38,13 @@ class DocumentCanvas(context: Context): View(context) {
         path.close()
 
         val p = Paint()
-        p.color = Color.BLUE
-        p.strokeWidth = 5F
+        //p.color = Color.BLUE
+        //p.strokeWidth = 5F
 
-        val newBox = PathShape(path, width, height)
-        newBox.draw(canvas, p)
+        //val newBox = PathShape(path, width, height)
+        //newBox.draw(canvas, p)
         canvas.drawPath(path, p)
       }
     } catch(ex: Exception) { context.showLongToast("excep")}
   }
-}
+}*/

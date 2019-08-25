@@ -5,4 +5,6 @@
 
   <string name="sheet_menu_title">Filters</string>
   <string name="sheet_menu_flash">Flash Options</string>
+
+  <string name="sheet_menu_title_new_scan">New Scan</string>
 </resources>

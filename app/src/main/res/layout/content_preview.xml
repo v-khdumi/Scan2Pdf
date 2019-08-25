@@ -7,16 +7,7 @@
   app:layout_behavior="@string/appbar_scrolling_view_behavior"
   tools:context=".activity.PreviewActivity"
   tools:showIn="@layout/activity_preview">
-
-  <Button
-      android:id="@+id/btnImageEnhance"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:text="Enhance Image"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"/>
-
+  
   <FrameLayout
       android:id="@+id/frameLayout"
       android:layout_width="0dp"
@@ -29,7 +20,7 @@
       android:layout_marginRight="8dp"
       android:layout_marginStart="8dp"
       android:layout_marginTop="8dp"
-      app:layout_constraintBottom_toTopOf="@+id/btnImageEnhance"
+      app:layout_constraintBottom_toTopOf="@+id/bottomNavigationPreview"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent">
@@ -42,14 +33,14 @@
         android:layout_margin="16dp">
 
       <ImageView
-          android:id="@+id/imageView"
+          android:id="@+id/previewImage"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_gravity="center"
           android:adjustViewBounds="true" />
     </FrameLayout>
 
-    <xyz.adhithyan.scan2pdf.views.PolygonView
+    <xyz.adhithyan.scan2pdf.views.CropImageView
         android:id="@+id/polygonView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

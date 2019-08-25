@@ -10,168 +10,49 @@ import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.Toast
 import com.yalantis.ucrop.UCrop
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_preview.*
 import kotlinx.android.synthetic.main.content_preview.*
 import org.opencv.android.Utils
-import org.opencv.core.*
-import org.opencv.core.Point
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.core.Size
 import ru.whalemare.sheetmenu.SheetMenu
-
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
-
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.HashMap
-
 import xyz.adhithyan.scan2pdf.R
 import xyz.adhithyan.scan2pdf.extensions.applyMagicFilter
 import xyz.adhithyan.scan2pdf.extensions.getProgressBar
 import xyz.adhithyan.scan2pdf.extensions.toByteArray
 import xyz.adhithyan.scan2pdf.listeners.SwypeListener
 import xyz.adhithyan.scan2pdf.util.*
-import xyz.adhithyan.scan2pdf.views.DocumentCanvas
-import xyz.adhithyan.scan2pdf.views.PolygonView
+import xyz.adhithyan.scan2pdf.views.CropImageView
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 
 class PreviewActivity : AppCompatActivity() {
-    internal var selectedImageBitmap: Bitmap? = null
-    internal var btnImageEnhance: Button? = null
-    private lateinit var nativeClass: NativeClass
-    private lateinit var polyView: PolygonView
     var i = 0
-    val n = ResultHolder.images?.size!!
-
-    private val btnImageEnhanceClick = View.OnClickListener {
-        //save selected bitmap to our constants
-        //this method will save the image to our device memory
-        //so set this variable to null after the image is no longer used
-        /*MyConstants.selectedImageBitmap = getCroppedImage();
-
-            //create new intent to start process image
-            Intent intent = new Intent(getApplicationContext(), ImageEnhanceActivity.class);
-            startActivity(intent);*/
-    }
-
-    protected val croppedImage: Bitmap
-        get() {
-
-            val points = polyView.points
-
-            val xRatio = selectedImageBitmap!!.width.toFloat() / imageView.width
-            val yRatio = selectedImageBitmap!!.height.toFloat() / imageView.height
-
-            val x1 = points[0]?.x!! * xRatio
-            val x2 = points[1]?.x!! * xRatio
-            val x3 = points[2]?.x!! * xRatio
-            val x4 = points[3]?.x!! * xRatio
-            val y1 = points[0]?.y!! * yRatio
-            val y2 = points[1]?.y!! * yRatio
-            val y3 = points[2]?.y!! * yRatio
-            val y4 = points[3]?.y!! * yRatio
-
-            return nativeClass.getScannedBitmap(selectedImageBitmap, x1, y1, x2, y2, x3, y3, x4, y4)
-
-        }
+    val n = ResultHolder.images!!.size
+    external fun getMagicColorBitmap(bitmap: Bitmap): Bitmap
+    private lateinit var currentBitmap: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preview)
-        initializeElement()
+        setSupportActionBar(toolbar)
+
+        title = "Preview - Scan2Pdf"
+        setBitmap(BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!), true)
         bottomNavigationPreview.setOnNavigationItemSelectedListener(bottomNavigationClickListener)
-    }
-
-    private fun initializeElement() {
-        nativeClass = NativeClass()
-        //btnImageEnhance = findViewById(R.id.btnImageEnhance);
-        polyView = polygonView as PolygonView
-        //holderImageCrop.post { initializeCropping() }
-        initializeCropping()
-        //btnImageEnhance.setOnClickListener(btnImageEnhanceClick);
         setImageviewSwypeListener()
-    }
-
-    private fun initializeCropping() {
-
-        selectedImageBitmap = BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!)
-        imageView.setImageBitmap(selectedImageBitmap)
-        //MyConstants.selectedImageBitmap = null;
-
-        val scaledBitmap = scaledBitmap(selectedImageBitmap!!, selectedImageBitmap?.width!!, selectedImageBitmap?.height!!)
-        imageView.setImageBitmap(scaledBitmap)
-
-        val tempBitmap = (imageView.drawable as BitmapDrawable).bitmap
-        val pointFs = getEdgePoints(scaledBitmap)
-
-        polyView.points = pointFs
-        polyView.visibility = View.VISIBLE
-
-        val padding = resources.getDimension(R.dimen.scanPadding).toInt()
-
-        val layoutParams = FrameLayout.LayoutParams(tempBitmap.width + 2 * padding, tempBitmap.height + 2 * padding)
-        layoutParams.gravity = Gravity.CENTER
-
-        polyView.layoutParams = layoutParams
-
-    }
-
-    private fun scaledBitmap(bitmap: Bitmap, width: Int, height: Int): Bitmap {
-        Log.v("aashari-tag", "scaledBitmap")
-        Log.v("aashari-tag", "$width $height")
-        val m = Matrix()
-        m.setRectToRect(RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat()), RectF(0f, 0f, width.toFloat(), height.toFloat()), Matrix.ScaleToFit.CENTER)
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
-    }
-
-    private fun getEdgePoints(tempBitmap: Bitmap): Map<Int, PointF> {
-        Log.v("aashari-tag", "getEdgePoints")
-        val pointFs = getContourEdgePoints(tempBitmap)
-        return orderedValidEdgePoints(tempBitmap, pointFs)
-    }
-
-    private fun getContourEdgePoints(tempBitmap: Bitmap): List<PointF> {
-        Log.v("aashari-tag", "getContourEdgePoints")
-
-        val point2f = nativeClass.getPoint(tempBitmap)
-        val points = Arrays.asList(*point2f!!.toArray())
-
-        val result = ArrayList<PointF>()
-        for (i in points.indices) {
-            result.add(PointF(points[i].x.toFloat(), points[i].y.toFloat()))
-        }
-
-        return result
-
-    }
-
-    private fun getOutlinePoints(tempBitmap: Bitmap): Map<Int, PointF> {
-        Log.v("aashari-tag", "getOutlinePoints")
-        val outlinePoints = HashMap<Int, PointF>()
-        outlinePoints[0] = PointF(0f, 0f)
-        outlinePoints[1] = PointF(tempBitmap.width.toFloat(), 0f)
-        outlinePoints[2] = PointF(0f, tempBitmap.height.toFloat())
-        outlinePoints[3] = PointF(tempBitmap.width.toFloat(), tempBitmap.height.toFloat())
-        return outlinePoints
-    }
-
-    private fun orderedValidEdgePoints(tempBitmap: Bitmap, pointFs: List<PointF>): Map<Int, PointF> {
-        Log.v("aashari-tag", "orderedValidEdgePoints")
-        var orderedPoints = polyView.getOrderedPoints(pointFs)
-        if (!polyView.isValidShape(orderedPoints)) {
-            orderedPoints = getOutlinePoints(tempBitmap)
-        }
-        return orderedPoints
     }
 
     override fun attachBaseContext(newBase: Context) {
@@ -181,11 +62,13 @@ class PreviewActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (resultCode) {
             Activity.RESULT_OK -> {
-                if(requestCode == UCrop.REQUEST_CROP) {
+                if (requestCode == UCrop.REQUEST_CROP) {
                     setCroppedImage(data)
                 }
             }
-            UCrop.RESULT_ERROR -> { Toast.makeText(this, "Error occured while cropping.", Toast.LENGTH_LONG).show() }
+            UCrop.RESULT_ERROR -> {
+                Toast.makeText(this, "Error occured while cropping.", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -193,8 +76,7 @@ class PreviewActivity : AppCompatActivity() {
         val progress = getProgressBar("Creating pdf..")
         progress.show()
 
-        val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),System.currentTimeMillis().toString() + ".pdf")
-        file.createNewFile()
+        val file = createNewPdfFile()
 
         Observable.just<Unit>(Unit)
                 .map { PdfUtil(file.absolutePath, ResultHolder.images!!).createPdf() }
@@ -207,18 +89,26 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     fun previousImage() {
-        i -= 1
+        if(i > 0){
+            i-=1
+        } else {
+            i=n-1
+        }
         setCurrentImage()
     }
 
     fun nextImage() {
-        i += 1
+        if(i<n) {
+            i += 1
+        } else {
+            i=0
+        }
         setCurrentImage()
     }
 
     fun cropImage() {
         val srcFile = FileUtil.createFile("temp_crop_src.jpg", filesDir)
-        if(srcFile.exists()) {
+        if (srcFile.exists()) {
             srcFile.delete()
         }
         srcFile.createNewFile()
@@ -226,7 +116,7 @@ class PreviewActivity : AppCompatActivity() {
         fos.write(ResultHolder.images?.get(Math.abs(i % n)))
 
         val destFile = File(filesDir, "temp_crop_dest.jpg")
-        if(destFile.exists()) {
+        if (destFile.exists()) {
             destFile.delete()
         }
         destFile.createNewFile()
@@ -236,6 +126,25 @@ class PreviewActivity : AppCompatActivity() {
                 .start(this)
     }
 
+    fun performCrop() {
+        val points = polygonView.getPoints()
+        val currentBitmap = (previewImage.drawable as BitmapDrawable).bitmap
+        val xRatio = ResultHolder.currentImageWidth.toFloat() / previewImage.width.toFloat()
+        val yRatio = ResultHolder.currentImageHeight.toFloat() / previewImage.height.toFloat()
+
+        val x1 = points.get(0)?.x!! * xRatio
+        val x2 = points.get(1)?.x!! * xRatio
+        val x3 = points.get(2)?.x!! * xRatio
+        val x4 = points.get(3)?.x!! * xRatio
+        val y1 = points.get(0)?.y!! * yRatio
+        val y2 = points.get(1)?.y!! * yRatio
+        val y3 = points.get(2)?.y!! * yRatio
+        val y4 = points.get(3)?.y!! * yRatio
+
+        val croppedBitmap = DocumentUtil().getScannedBitmap(currentBitmap, x1, y1, x2, y2, x3, y3, x4, y4)
+        setBitmap(croppedBitmap, false)
+        ResultHolder.images!![i] =  croppedBitmap.toByteArray()
+    }
 
     fun convertToBw() {
         val progress = getProgressBar("Converting to black & white..")
@@ -247,7 +156,7 @@ class PreviewActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     ResultHolder.images!![Math.abs(i % n)] = it.toByteArray()
-                    setBitmap(it)
+                    setBitmap(it, true)
                     progress.dismiss()
                 }
     }
@@ -255,32 +164,45 @@ class PreviewActivity : AppCompatActivity() {
     private fun setCurrentImage() {
         val currentImage = ResultHolder.images?.get(Math.abs(i % n))
         val currentImageSize = currentImage?.size!!
-        setBitmap(BitmapFactory.decodeByteArray(currentImage, 0, currentImageSize))
+        setBitmap(BitmapFactory.decodeByteArray(currentImage, 0, currentImageSize), true)
     }
 
-    private fun setBitmap(image: Bitmap) {
+    private fun setBitmap(image: Bitmap, detectDoc: Boolean) {
         ResultHolder.currentImageWidth = image.width
         ResultHolder.currentImageHeight = image.height
 
-        imageView.setImageBitmap(image)
+        previewImage.setImageBitmap(image)
+
+        val mat = Mat(Size(image.width.toDouble(), image.height.toDouble()), CvType.CV_8U)
+        Utils.bitmapToMat(image, mat)
+
+        holderImageCrop.post {
+            if(detectDoc) {
+                detectDocument()
+            }
+        }
     }
 
     private fun setCroppedImage(data: Intent?) {
         val result = UCrop.getOutput(data!!)
         val croppedImage = FileUtil.getByteArray(result!!, contentResolver)
         ResultHolder.images!![Math.abs(i % n)] = croppedImage
-        imageView.setImageBitmap(BitmapFactory.decodeByteArray(croppedImage, 0, croppedImage.size))
+        previewImage.setImageBitmap(BitmapFactory.decodeByteArray(croppedImage, 0, croppedImage.size))
     }
 
     private fun setImageviewSwypeListener() {
-        imageView.setOnTouchListener(object : SwypeListener(this@PreviewActivity) {
-            override fun onSwipeTop() { }
+        frameLayout.setOnTouchListener(object : SwypeListener(this@PreviewActivity) {
+            override fun onSwipeTop() {}
 
-            override fun onSwipeRight() { nextImage() }
+            override fun onSwipeRight() {
+                nextImage()
+            }
 
-            override fun onSwipeLeft() { previousImage() }
+            override fun onSwipeLeft() {
+                previousImage()
+            }
 
-            override fun onSwipeBottom() { }
+            override fun onSwipeBottom() {}
         })
     }
 
@@ -288,10 +210,10 @@ class PreviewActivity : AppCompatActivity() {
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.preview_menu_crop -> {
-                    //cropImage()
+                    performCrop()
                     return@OnNavigationItemSelectedListener true
                 }
-                R.id.preview_menu_filters-> {
+                R.id.preview_menu_filters -> {
                     showPhotoFilters()
                     return@OnNavigationItemSelectedListener true
                 }
@@ -309,9 +231,15 @@ class PreviewActivity : AppCompatActivity() {
             titleId = R.string.sheet_menu_title
             click = MenuItem.OnMenuItemClickListener {
                 when (it.itemId) {
-                    R.id.filter_bw -> { convertToBw();true }
-                    R.id.filter_magic -> { magicFilter(); true }
-                    else -> {true}
+                    R.id.filter_bw -> {
+                        convertToBw();true
+                    }
+                    R.id.filter_magic -> {
+                        magicFilter(); true
+                    }
+                    else -> {
+                        true
+                    }
                 }
             }
             menu = R.menu.photo_filters
@@ -331,8 +259,58 @@ class PreviewActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     ResultHolder.images!![Math.abs(i % n)] = it.toByteArray()
-                    setBitmap(it)
+                    setBitmap(it, true)
                     progress.dismiss()
                 }
     }
+
+    private fun detectDocument() {
+        var tmpBitmap = ((previewImage.drawable) as BitmapDrawable).bitmap
+        val scaledBitmap = scaledBitmap(tmpBitmap, holderImageCrop.width, holderImageCrop.height)
+        previewImage.setImageBitmap(scaledBitmap)
+        ResultHolder.currentImageHeight = scaledBitmap.height
+        ResultHolder.currentImageWidth = scaledBitmap.width
+
+        tmpBitmap = scaledBitmap
+        val edgepoints = edgePoints(tmpBitmap)
+        polygonView.setPoints(edgepoints)
+        polygonView.visibility = View.VISIBLE
+
+        val padding = resources.getDimension(R.dimen.fab_margin).toInt()
+        val layoutParams = FrameLayout.LayoutParams(tmpBitmap.getWidth() + 2 * padding, tmpBitmap.getHeight() + 2 * padding)
+        layoutParams.gravity = Gravity.CENTER
+
+        polygonView.layoutParams = layoutParams
+    }
+
+    fun edgePoints(bitmap: Bitmap): Map<Int, PointF> {
+        val pointsF = DocumentUtil().getContourEdgePoints(bitmap)
+        val orderedPoints = orderedValidEdgePoints(bitmap, pointsF)
+        return orderedPoints
+    }
+
+
+    private fun getOutlinePoints(tempBitmap: Bitmap): Map<Int, PointF> {
+        val outlinePoints = HashMap<Int, PointF>()
+        outlinePoints.put(0, PointF(0f, 0f))
+        outlinePoints.put(1, PointF(tempBitmap.width.toFloat(), 0f))
+        outlinePoints.put(2, PointF(0f, tempBitmap.height.toFloat()))
+        outlinePoints.put(3, PointF(tempBitmap.width.toFloat(), tempBitmap.height.toFloat()))
+        return outlinePoints
+    }
+
+    private fun orderedValidEdgePoints(tempBitmap: Bitmap, pointFs: List<PointF>): Map<Int, PointF> {
+        var orderedPoints = getOrderedPoints(pointFs);
+        if (isValidShape(orderedPoints)) {
+            orderedPoints = getOutlinePoints(tempBitmap);
+        }
+        return orderedPoints;
+    }
+
+    private fun scaledBitmap(bitmap: Bitmap, width: Int, height: Int): Bitmap {
+        val m = Matrix()
+        m.setRectToRect(RectF(0F, 0F, bitmap.width.toFloat(), bitmap.height.toFloat()), RectF(0F, 0F, width.toFloat(), height.toFloat()), Matrix.ScaleToFit.CENTER)
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
+    }
+
 }
