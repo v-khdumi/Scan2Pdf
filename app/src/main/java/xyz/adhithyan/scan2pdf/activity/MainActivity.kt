@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ArrayAdapter
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.PicassoEngine
@@ -22,11 +23,15 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
 import xyz.adhithyan.scan2pdf.extensions.checkOrGetPermissions
 import xyz.adhithyan.scan2pdf.extensions.requestPermissionsResult
+import xyz.adhithyan.scan2pdf.util.ROOT_PATH
 import xyz.adhithyan.scan2pdf.util.ResultHolder
+import xyz.adhithyan.scan2pdf.util.listAllFiles
 import xyz.adhithyan.scan2pdf.util.toByteArray
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     val CHOOSE_IMAGES = 3592
+    private lateinit var PDF_LIST: Array<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +41,17 @@ class MainActivity : AppCompatActivity() {
         title = "My Scans"
 
         checkOrGetPermissions()
+        PDF_LIST = listAllFiles()
+        var adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, PDF_LIST)
+        scans_list_view.adapter = adapter
+
+        scans_list_view.setOnItemClickListener { adapterView, view, i, l ->
+            val pdfFile = ROOT_PATH + PDF_LIST[i]
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setDataAndType(Uri.fromFile(File(pdfFile)), "application/pdf")
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity(intent)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

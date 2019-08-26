@@ -7,6 +7,9 @@ import android.os.Environment
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
+
+val ROOT_PATH = Environment.getExternalStorageDirectory().absolutePath + "/Scan2Pdf/"
 
 class FileUtil {
   companion object {
@@ -62,14 +65,29 @@ fun Uri.toByteArray(context: Context): ByteArray {
 }
 
 fun createNewPdfFile(): File {
-  val rootPath = Environment.getExternalStorageDirectory().absolutePath + "/Scan2Pdf/"
-  val root = File(rootPath)
+  val root = File(ROOT_PATH)
   if(!root.exists()) {
     root.mkdirs()
   }
 
-  val file = File(rootPath, "${System.currentTimeMillis()}.pdf")
+  val file = File(ROOT_PATH, "${System.currentTimeMillis()}.pdf")
   file.createNewFile()
 
   return file
+}
+
+fun listAllFiles(): Array<String> {
+  val root = File(ROOT_PATH)
+
+  if(!root.exists()) {
+    return arrayOf("No scans present. Go ahead and create a new scan.")
+  }
+
+  val files = root.listFiles().filter { it.name.contains(".pdf") }
+  var pdfFiles = LinkedList<String>()
+  for(file in files) {
+    pdfFiles.add(file.name)
+  }
+
+  return pdfFiles.toTypedArray()
 }
