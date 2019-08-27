@@ -28,6 +28,9 @@ import xyz.adhithyan.scan2pdf.util.ResultHolder
 import xyz.adhithyan.scan2pdf.util.listAllFiles
 import xyz.adhithyan.scan2pdf.util.toByteArray
 import java.io.File
+import android.support.v4.content.FileProvider
+import xyz.adhithyan.scan2pdf.BuildConfig
+
 
 class MainActivity : AppCompatActivity() {
     val CHOOSE_IMAGES = 3592
@@ -46,10 +49,14 @@ class MainActivity : AppCompatActivity() {
         scans_list_view.adapter = adapter
 
         scans_list_view.setOnItemClickListener { adapterView, view, i, l ->
-            val pdfFile = ROOT_PATH + PDF_LIST[i]
+            val pdfFile = File(ROOT_PATH + PDF_LIST[i])
+            val pdfURI = FileProvider.getUriForFile(this@MainActivity,
+                    BuildConfig.APPLICATION_ID + ".provider",
+                    pdfFile)
+
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.setDataAndType(Uri.fromFile(File(pdfFile)), "application/pdf")
-            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            intent.setDataAndType(pdfURI, "application/pdf")
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
         }
     }

@@ -89,5 +89,9 @@ fun listAllFiles(): Array<String> {
     pdfFiles.add(file.name)
   }
 
+  if(pdfFiles.isEmpty()) {
+    return arrayOf("No scans present. Go ahead and create a new scan.")
+  }
+
   return pdfFiles.toTypedArray()
 }
