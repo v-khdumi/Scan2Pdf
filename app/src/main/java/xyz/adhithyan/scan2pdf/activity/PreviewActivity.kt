@@ -36,6 +36,7 @@ import xyz.adhithyan.scan2pdf.util.*
 import xyz.adhithyan.scan2pdf.views.CropImageView
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.NullPointerException
 import java.util.*
 
 class PreviewActivity : AppCompatActivity() {
@@ -85,6 +86,10 @@ class PreviewActivity : AppCompatActivity() {
                 .subscribe {
                     Toast.makeText(this, "Pdf created successfully.", Toast.LENGTH_LONG).show()
                     progress.dismiss()
+                    finish()
+                    val intent = Intent(this@PreviewActivity, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent)
                 }
     }
 
@@ -178,7 +183,11 @@ class PreviewActivity : AppCompatActivity() {
 
         holderImageCrop.post {
             if(detectDoc) {
-                detectDocument()
+                try {
+                    detectDocument()
+                } catch (ex: NullPointerException) {
+
+                }
             }
         }
     }

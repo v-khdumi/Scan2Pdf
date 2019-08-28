@@ -29,6 +29,8 @@ import xyz.adhithyan.scan2pdf.util.listAllFiles
 import xyz.adhithyan.scan2pdf.util.toByteArray
 import java.io.File
 import android.support.v4.content.FileProvider
+import android.view.ContextMenu
+import android.view.View
 import xyz.adhithyan.scan2pdf.BuildConfig
 
 
@@ -59,6 +61,7 @@ class MainActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
         }
+        registerForContextMenu(scans_list_view)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -149,5 +152,21 @@ class MainActivity : AppCompatActivity() {
             }
             menu = R.menu.new_scan
         }.show(this)
+    }
+
+    override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        menuInflater.inflate(R.menu.pdf_context_menu, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val info = item.menuInfo
+
+        when(item.itemId) {
+            R.id.scan_pdf_rename -> {
+                return true
+            }
+        }
+        return super.onContextItemSelected(item)
     }
 }
