@@ -1,7 +1,9 @@
 package xyz.adhithyan.scan2pdf.activity
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
@@ -23,15 +25,16 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import xyz.adhithyan.scan2pdf.R
 import xyz.adhithyan.scan2pdf.extensions.checkOrGetPermissions
 import xyz.adhithyan.scan2pdf.extensions.requestPermissionsResult
-import xyz.adhithyan.scan2pdf.util.ROOT_PATH
-import xyz.adhithyan.scan2pdf.util.ResultHolder
-import xyz.adhithyan.scan2pdf.util.listAllFiles
-import xyz.adhithyan.scan2pdf.util.toByteArray
 import java.io.File
 import android.support.v4.content.FileProvider
+import android.text.InputType
 import android.view.ContextMenu
 import android.view.View
+import android.widget.AdapterView
+import android.widget.EditText
+import android.widget.Toast
 import xyz.adhithyan.scan2pdf.BuildConfig
+import xyz.adhithyan.scan2pdf.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -160,13 +163,53 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val info = item.menuInfo
+        val info = item.menuInfo as AdapterView.AdapterContextMenuInfo
 
         when(item.itemId) {
             R.id.scan_pdf_rename -> {
+                val i = info.id.toInt()
+                val srcFileName = PDF_LIST[i]
+                showRenameFileDialog(srcFileName, i)
                 return true
             }
         }
         return super.onContextItemSelected(item)
+    }
+
+    private fun showRenameFileDialog(srcFile: String, i: Int) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Rename file")
+
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+
+        builder.setView(input)
+
+        builder.setPositiveButton("OK", object: DialogInterface.OnClickListener {
+            override fun onClick(dialog: DialogInterface?, which: Int) {
+                var destFileName = input.text.toString().trim()
+                if(!destFileName.endsWith(".pdf")) {
+                    destFileName += ".pdf"
+                }
+                if(destFileName.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "File name cannot be empty", Toast.LENGTH_LONG).show()
+                    dialog?.dismiss()
+                } else {
+                    val isFileRenamed = this@MainActivity.rename(srcFile, destFileName)
+                    if(isFileRenamed) {
+                        Toast.makeText(this@MainActivity, "File rename success", Toast.LENGTH_LONG).show()
+                        PDF_LIST[i] = destFileName
+                        var adapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, PDF_LIST)
+                        scans_list_view.adapter = adapter
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        Toast.makeText(this@MainActivity, "File rename failed.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        })
+
+        builder.setNegativeButton("Cancel", null)
+        builder.show()
     }
 }

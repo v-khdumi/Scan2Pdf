@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.widget.Toast
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -94,4 +95,20 @@ fun listAllFiles(): Array<String> {
   }
 
   return pdfFiles.toTypedArray()
+}
+
+fun Context.rename(srcFile: String, destFile: String): Boolean {
+  var dest = destFile
+  if(!dest.endsWith(".pdf")) {
+    dest += ".pdf"
+  }
+
+  val destination = File(ROOT_PATH, dest)
+  val source = File(ROOT_PATH, srcFile)
+
+  if(!source.exists()) {
+    return false
+  }
+
+  return source.renameTo(destination)
 }
