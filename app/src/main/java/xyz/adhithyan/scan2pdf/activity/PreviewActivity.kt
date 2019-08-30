@@ -44,6 +44,7 @@ class PreviewActivity : AppCompatActivity() {
     val n = ResultHolder.images!!.size
     external fun getMagicColorBitmap(bitmap: Bitmap): Bitmap
     private lateinit var currentBitmap: Bitmap
+    private lateinit var imagesCropped: BooleanArray
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +52,7 @@ class PreviewActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         title = "Preview - Scan2Pdf"
+        imagesCropped = BooleanArray(n) {false}
         setBitmap(BitmapFactory.decodeByteArray(ResultHolder.image!!, 0, ResultHolder.image?.size!!), true)
         bottomNavigationPreview.setOnNavigationItemSelectedListener(bottomNavigationClickListener)
         setImageviewSwypeListener()
@@ -96,17 +98,21 @@ class PreviewActivity : AppCompatActivity() {
     fun previousImage() {
         if(i > 0){
             i-=1
-        } else {
+        }
+
+        if(i == 0) {
             i=n-1
         }
         setCurrentImage()
     }
 
     fun nextImage() {
-        if(i<n) {
+        if(i<n-1) {
             i += 1
-        } else {
-            i=0
+        }
+
+        if(i == n-1) {
+            i = 0
         }
         setCurrentImage()
     }
@@ -149,6 +155,7 @@ class PreviewActivity : AppCompatActivity() {
         val croppedBitmap = DocumentUtil().getScannedBitmap(currentBitmap, x1, y1, x2, y2, x3, y3, x4, y4)
         setBitmap(croppedBitmap, false)
         ResultHolder.images!![i] =  croppedBitmap.toByteArray()
+        polygonView.visibility = View.INVISIBLE
     }
 
     fun convertToBw() {
@@ -280,16 +287,18 @@ class PreviewActivity : AppCompatActivity() {
         ResultHolder.currentImageHeight = scaledBitmap.height
         ResultHolder.currentImageWidth = scaledBitmap.width
 
-        tmpBitmap = scaledBitmap
-        val edgepoints = edgePoints(tmpBitmap)
-        polygonView.setPoints(edgepoints)
-        polygonView.visibility = View.VISIBLE
+        if(!imagesCropped[i]) {
+            tmpBitmap = scaledBitmap
+            val edgepoints = edgePoints(tmpBitmap)
+            polygonView.setPoints(edgepoints)
+            polygonView.visibility = View.VISIBLE
 
-        val padding = resources.getDimension(R.dimen.fab_margin).toInt()
-        val layoutParams = FrameLayout.LayoutParams(tmpBitmap.getWidth() + 2 * padding, tmpBitmap.getHeight() + 2 * padding)
-        layoutParams.gravity = Gravity.CENTER
+            val padding = resources.getDimension(R.dimen.fab_margin).toInt()
+            val layoutParams = FrameLayout.LayoutParams(tmpBitmap.getWidth() + 2 * padding, tmpBitmap.getHeight() + 2 * padding)
+            layoutParams.gravity = Gravity.CENTER
 
-        polygonView.layoutParams = layoutParams
+            polygonView.layoutParams = layoutParams
+        }
     }
 
     fun edgePoints(bitmap: Bitmap): Map<Int, PointF> {
