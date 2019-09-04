@@ -138,24 +138,30 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     fun performCrop() {
-        val points = polygonView.getPoints()
-        val currentBitmap = (previewImage.drawable as BitmapDrawable).bitmap
-        val xRatio = ResultHolder.currentImageWidth.toFloat() / previewImage.width.toFloat()
-        val yRatio = ResultHolder.currentImageHeight.toFloat() / previewImage.height.toFloat()
+        if(!imagesCropped[i]) {
+            val points = polygonView.getPoints()
+            val currentBitmap = (previewImage.drawable as BitmapDrawable).bitmap
+            val xRatio = ResultHolder.currentImageWidth.toFloat() / previewImage.width.toFloat()
+            val yRatio = ResultHolder.currentImageHeight.toFloat() / previewImage.height.toFloat()
 
-        val x1 = points.get(0)?.x!! * xRatio
-        val x2 = points.get(1)?.x!! * xRatio
-        val x3 = points.get(2)?.x!! * xRatio
-        val x4 = points.get(3)?.x!! * xRatio
-        val y1 = points.get(0)?.y!! * yRatio
-        val y2 = points.get(1)?.y!! * yRatio
-        val y3 = points.get(2)?.y!! * yRatio
-        val y4 = points.get(3)?.y!! * yRatio
+            val x1 = points.get(0)?.x!! * xRatio
+            val x2 = points.get(1)?.x!! * xRatio
+            val x3 = points.get(2)?.x!! * xRatio
+            val x4 = points.get(3)?.x!! * xRatio
+            val y1 = points.get(0)?.y!! * yRatio
+            val y2 = points.get(1)?.y!! * yRatio
+            val y3 = points.get(2)?.y!! * yRatio
+            val y4 = points.get(3)?.y!! * yRatio
 
-        val croppedBitmap = DocumentUtil().getScannedBitmap(currentBitmap, x1, y1, x2, y2, x3, y3, x4, y4)
-        setBitmap(croppedBitmap, false)
-        ResultHolder.images!![i] =  croppedBitmap.toByteArray()
-        polygonView.visibility = View.INVISIBLE
+            val croppedBitmap = DocumentUtil().getScannedBitmap(currentBitmap, x1, y1, x2, y2, x3, y3, x4, y4)
+            imagesCropped[i] = true
+            setBitmap(croppedBitmap, false)
+            ResultHolder.images!![i] =  croppedBitmap.toByteArray()
+            polygonView.visibility = View.INVISIBLE
+        } else {
+            imagesCropped[i] = false
+            detectDocument()
+        }
     }
 
     fun convertToBw() {
