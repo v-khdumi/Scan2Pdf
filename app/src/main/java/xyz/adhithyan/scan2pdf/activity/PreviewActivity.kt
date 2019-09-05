@@ -45,6 +45,7 @@ class PreviewActivity : AppCompatActivity() {
     external fun getMagicColorBitmap(bitmap: Bitmap): Bitmap
     private lateinit var currentBitmap: Bitmap
     private lateinit var imagesCropped: BooleanArray
+    private var canCrop = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,6 +139,11 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     fun performCrop() {
+        if(!canCrop) {
+            Toast.makeText(this@PreviewActivity, "Cannot crop", Toast.LENGTH_LONG).show()
+            return
+        }
+
         if(!imagesCropped[i]) {
             val points = polygonView.getPoints()
             val currentBitmap = (previewImage.drawable as BitmapDrawable).bitmap
@@ -180,6 +186,7 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     private fun setCurrentImage() {
+        canCrop = true
         val currentImage = ResultHolder.images?.get(Math.abs(i % n))
         val currentImageSize = currentImage?.size!!
         setBitmap(BitmapFactory.decodeByteArray(currentImage, 0, currentImageSize), true)
@@ -199,7 +206,8 @@ class PreviewActivity : AppCompatActivity() {
                 try {
                     detectDocument()
                 } catch (ex: NullPointerException) {
-
+                    canCrop = false
+                    Toast.makeText(this@PreviewActivity, "Unable to initiate cropper for this image.", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -287,23 +295,28 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     private fun detectDocument() {
-        var tmpBitmap = ((previewImage.drawable) as BitmapDrawable).bitmap
-        val scaledBitmap = scaledBitmap(tmpBitmap, holderImageCrop.width, holderImageCrop.height)
-        previewImage.setImageBitmap(scaledBitmap)
-        ResultHolder.currentImageHeight = scaledBitmap.height
-        ResultHolder.currentImageWidth = scaledBitmap.width
+        try {
+            var tmpBitmap = ((previewImage.drawable) as BitmapDrawable).bitmap
+            val scaledBitmap = scaledBitmap(tmpBitmap, holderImageCrop.width, holderImageCrop.height)
+            previewImage.setImageBitmap(scaledBitmap)
+            ResultHolder.currentImageHeight = scaledBitmap.height
+            ResultHolder.currentImageWidth = scaledBitmap.width
 
-        if(!imagesCropped[i]) {
-            tmpBitmap = scaledBitmap
-            val edgepoints = edgePoints(tmpBitmap)
-            polygonView.setPoints(edgepoints)
-            polygonView.visibility = View.VISIBLE
+            if(!imagesCropped[i]) {
+                tmpBitmap = scaledBitmap
+                val edgepoints = edgePoints(tmpBitmap)
+                polygonView.setPoints(edgepoints)
+                polygonView.visibility = View.VISIBLE
 
-            val padding = resources.getDimension(R.dimen.fab_margin).toInt()
-            val layoutParams = FrameLayout.LayoutParams(tmpBitmap.getWidth() + 2 * padding, tmpBitmap.getHeight() + 2 * padding)
-            layoutParams.gravity = Gravity.CENTER
+                val padding = resources.getDimension(R.dimen.fab_margin).toInt()
+                val layoutParams = FrameLayout.LayoutParams(tmpBitmap.getWidth() + 2 * padding, tmpBitmap.getHeight() + 2 * padding)
+                layoutParams.gravity = Gravity.CENTER
 
-            polygonView.layoutParams = layoutParams
+                polygonView.layoutParams = layoutParams
+            }
+        } catch (ex: Exception) {
+            Toast.makeText(this@PreviewActivity, "Unable to initiate cropper for this image.", Toast.LENGTH_LONG).show()
+            canCrop = false
         }
     }
 
@@ -337,4 +350,8 @@ class PreviewActivity : AppCompatActivity() {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
     }
 
+    override fun onBackPressed() {
+        ResultHolder.clearImages()
+        super.onBackPressed()
+    }
 }
