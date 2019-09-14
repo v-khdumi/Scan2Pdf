@@ -4,4 +4,8 @@
         android:title="Rename"
         android:id="@+id/scan_pdf_rename"
         />
+    <item
+        android:title="Share"
+        android:id="@+id/scan_pdf_share"
+        />
 </menu>

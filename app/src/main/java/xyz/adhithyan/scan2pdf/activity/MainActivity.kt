@@ -172,6 +172,10 @@ class MainActivity : AppCompatActivity() {
                 showRenameFileDialog(srcFileName, i)
                 return true
             }
+            R.id.scan_pdf_share -> {
+                val i = info.id.toInt()
+                sharePdf(i)
+            }
         }
         return super.onContextItemSelected(item)
     }
@@ -211,5 +215,20 @@ class MainActivity : AppCompatActivity() {
 
         builder.setNegativeButton("Cancel", null)
         builder.show()
+    }
+
+    private fun sharePdf(i: Int) {
+        val pdfFile = File(ROOT_PATH + PDF_LIST[i])
+        val pdfURI = FileProvider.getUriForFile(this@MainActivity,
+                BuildConfig.APPLICATION_ID + ".provider",
+                pdfFile)
+
+        val intent = Intent()
+        intent.action = Intent.ACTION_SEND
+        intent.putExtra(Intent.EXTRA_TEXT, "Pdf created using Scan2Pdf app. \n")
+        intent.putExtra(Intent.EXTRA_STREAM, pdfURI)
+        intent.type = "application/pdf"
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(Intent.createChooser(intent, "Share PDF"))
     }
 }
