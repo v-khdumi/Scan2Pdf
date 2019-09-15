@@ -14,12 +14,27 @@ class ImageUtil {
         val THRESHOLD = 230
 
         fun calculateFitSize(originalWidth: Float, originalHeight: Float, documentSize: Rectangle): Rectangle {
+            if(originalWidth <= documentSize.width && originalHeight <= documentSize.height) {
+                return Rectangle(Math.abs(originalWidth).toFloat(), Math.abs(originalHeight).toFloat())
+            }
+
+            var widthScalingRequired = false
+            var heightScalingRequired = false
+
+            if(originalWidth > documentSize.width) {
+                widthScalingRequired = true
+            }
+
+            if(originalHeight > documentSize.height) {
+                heightScalingRequired = true
+            }
+
             val widthChange = (originalWidth - documentSize.width) / originalWidth
             val heightChange = (originalHeight - documentSize.height) / originalHeight
 
             val changeFactor = if (heightChange >= widthChange) heightChange else widthChange
-            val newWidth = (originalWidth - originalWidth * changeFactor).toInt()
-            val newHeight = (originalHeight - originalHeight * changeFactor).toInt()
+            val newWidth = if(widthScalingRequired) (originalWidth - originalWidth * changeFactor).toInt() else originalWidth.toInt()
+            val newHeight = if(heightScalingRequired) (originalHeight - originalHeight * changeFactor).toInt() else originalHeight.toInt()
 
             return Rectangle(Math.abs(newWidth).toFloat(), Math.abs(newHeight).toFloat())
         }
