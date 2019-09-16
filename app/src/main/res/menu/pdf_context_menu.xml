@@ -8,4 +8,8 @@
         android:title="Share"
         android:id="@+id/scan_pdf_share"
         />
+    <item
+        android:title="Delete"
+        android:id="@+id/scan_pdf_delete"
+        />
 </menu>

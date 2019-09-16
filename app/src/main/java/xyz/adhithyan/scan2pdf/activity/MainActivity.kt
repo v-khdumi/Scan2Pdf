@@ -2,6 +2,7 @@ package xyz.adhithyan.scan2pdf.activity
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -13,7 +14,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ArrayAdapter
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.PicassoEngine
@@ -30,9 +30,10 @@ import android.support.v4.content.FileProvider
 import android.text.InputType
 import android.view.ContextMenu
 import android.view.View
-import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import xyz.adhithyan.scan2pdf.BuildConfig
 import xyz.adhithyan.scan2pdf.util.*
 
@@ -176,6 +177,10 @@ class MainActivity : AppCompatActivity() {
                 val i = info.id.toInt()
                 sharePdf(i)
             }
+            R.id.scan_pdf_delete -> {
+                val i = info.id.toInt()
+                deletePdf(i)
+            }
         }
         return super.onContextItemSelected(item)
     }
@@ -231,4 +236,26 @@ class MainActivity : AppCompatActivity() {
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivity(Intent.createChooser(intent, "Share PDF"))
     }
+
+    private fun deletePdf(i: Int) {
+        val progress = ProgressDialog(this)
+        progress.setTitle("Deleting pdf ...")
+        progress.show()
+        val pdfFile = File(ROOT_PATH + PDF_LIST[i])
+
+        Observable.just<Unit>(Unit)
+                .map { pdfFile.delete() }
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    Toast.makeText(this, "Pdf deleted successfully.", Toast.LENGTH_LONG).show()
+                    PDF_LIST = PDF_LIST.drop(i).toTypedArray()
+                    var adapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, PDF_LIST)
+                    scans_list_view.adapter = adapter
+                    adapter.notifyDataSetChanged()
+                    progress.dismiss()
+                }
+    }
+
+
 }
