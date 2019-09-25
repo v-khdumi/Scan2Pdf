@@ -249,7 +249,9 @@ class MainActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     Toast.makeText(this, "Pdf deleted successfully.", Toast.LENGTH_LONG).show()
-                    PDF_LIST = PDF_LIST.drop(i).toTypedArray()
+                    val newPdfList = PDF_LIST.toMutableList()
+                    newPdfList.removeAt(i)
+                    PDF_LIST = newPdfList.toTypedArray()
                     var adapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, PDF_LIST)
                     scans_list_view.adapter = adapter
                     adapter.notifyDataSetChanged()
