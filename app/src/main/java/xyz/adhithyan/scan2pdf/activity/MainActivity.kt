@@ -248,13 +248,17 @@ class MainActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    Toast.makeText(this, "Pdf deleted successfully.", Toast.LENGTH_LONG).show()
-                    val newPdfList = PDF_LIST.toMutableList()
-                    newPdfList.removeAt(i)
-                    PDF_LIST = newPdfList.toTypedArray()
-                    var adapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, PDF_LIST)
-                    scans_list_view.adapter = adapter
-                    adapter.notifyDataSetChanged()
+                    if(it) {
+                        Toast.makeText(this, "Pdf deleted successfully.", Toast.LENGTH_LONG).show()
+                        val newPdfList = PDF_LIST.toMutableList()
+                        newPdfList.removeAt(i)
+                        PDF_LIST = newPdfList.toTypedArray()
+                        var adapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, PDF_LIST)
+                        scans_list_view.adapter = adapter
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        Toast.makeText(this, "Pdf deletion failed.", Toast.LENGTH_LONG).show()
+                    }
                     progress.dismiss()
                 }
     }
