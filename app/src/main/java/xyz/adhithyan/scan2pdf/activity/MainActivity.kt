@@ -65,7 +65,8 @@ class MainActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
         }
-        registerForContextMenu(scans_list_view)
+
+        registerOrRemoveContextMenu()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -159,6 +160,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+        if(PDF_LIST.size == 1 && PDF_LIST[0] == NO_SCANS_PRESENT) {
+            return;
+        }
         super.onCreateContextMenu(menu, v, menuInfo)
         menuInflater.inflate(R.menu.pdf_context_menu, menu)
     }
@@ -252,10 +256,11 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this, "Pdf deleted successfully.", Toast.LENGTH_LONG).show()
                         val newPdfList = PDF_LIST.toMutableList()
                         newPdfList.removeAt(i)
-                        PDF_LIST = newPdfList.toTypedArray()
+                        PDF_LIST = listAllFiles()
                         var adapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, PDF_LIST)
                         scans_list_view.adapter = adapter
                         adapter.notifyDataSetChanged()
+                        registerOrRemoveContextMenu()
                     } else {
                         Toast.makeText(this, "Pdf deletion failed.", Toast.LENGTH_LONG).show()
                     }
@@ -264,4 +269,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    private fun registerOrRemoveContextMenu() {
+        if(PDF_LIST.size == 1 &&  PDF_LIST[0] == NO_SCANS_PRESENT) {
+            return;
+        } else {
+            registerForContextMenu(scans_list_view)
+        }
+    }
 }

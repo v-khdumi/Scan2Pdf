@@ -11,6 +11,7 @@ import java.io.FileOutputStream
 import java.util.*
 
 val ROOT_PATH = Environment.getExternalStorageDirectory().absolutePath + "/Scan2Pdf/"
+val NO_SCANS_PRESENT = "No scans present. Go ahead and create a new scan."
 
 class FileUtil {
   companion object {
@@ -81,7 +82,7 @@ fun listAllFiles(): Array<String> {
   val root = File(ROOT_PATH)
 
   if(!root.exists()) {
-    return arrayOf("No scans present. Go ahead and create a new scan.")
+    return arrayOf(NO_SCANS_PRESENT)
   }
 
   val files = root.listFiles().filter { it.name.contains(".pdf") }
@@ -91,7 +92,7 @@ fun listAllFiles(): Array<String> {
   }
 
   if(pdfFiles.isEmpty()) {
-    return arrayOf("No scans present. Go ahead and create a new scan.")
+    return arrayOf(NO_SCANS_PRESENT)
   }
 
   return pdfFiles.toTypedArray()
