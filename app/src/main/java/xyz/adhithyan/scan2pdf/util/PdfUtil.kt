@@ -2,10 +2,10 @@ package xyz.adhithyan.scan2pdf.util
 
 import android.graphics.BitmapFactory
 import android.widget.Toast
-import com.itextpdf.text.Document
-import com.itextpdf.text.Image
-import com.itextpdf.text.PageSize
-import com.itextpdf.text.Rectangle
+import com.itextpdf.text.*
+import com.itextpdf.text.pdf.ColumnText
+import com.itextpdf.text.pdf.GrayColor
+import com.itextpdf.text.pdf.PdfPageEventHelper
 import com.itextpdf.text.pdf.PdfWriter
 import java.io.FileOutputStream
 import java.lang.Exception
@@ -18,7 +18,8 @@ class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<Byte
         document.setMargins(50F, 38F, 50F, 38F)
 
         try {
-            PdfWriter.getInstance(document, FileOutputStream(filename))
+            val writer = PdfWriter.getInstance(document, FileOutputStream(filename))
+            writer.pageEvent = WatermarkEvent()
             document.open()
 
             for (jpeg in jpegs) {
@@ -46,5 +47,13 @@ class PdfUtil(internal val filename: String, internal val jpegs: LinkedList<Byte
                 document.close()
             }
         }
+    }
+}
+
+class WatermarkEvent: PdfPageEventHelper() {
+    val FONT = Font(Font.FontFamily.HELVETICA, 52F, Font.BOLD, GrayColor(0.85f))
+
+    override fun onEndPage(writer: PdfWriter, document: Document?) {
+        ColumnText.showTextAligned(writer.directContentUnder, Element.ALIGN_CENTER, Phrase("Scanned by Scan2Pdf", FONT), 297.5f, 421f, if (writer.pageNumber % 2 == 1) 45F else -45F)
     }
 }
